@@ -105,23 +105,23 @@ instance HasTemperature Double where
   temperature =
     from _Wrapped
 
-data AirSpeed =
-  AirSpeed
+data IndicatedAirSpeed =
+  IndicatedAirSpeed
     Double
   deriving (Eq, Ord, Show)
 
-class HasAirSpeed a where
-  airSpeed ::
+class HasIndicatedAirSpeed a where
+  indicatedAirSpeed ::
     Lens'
       a
-      AirSpeed
+      IndicatedAirSpeed
 
-instance HasAirSpeed AirSpeed where
-  airSpeed =
+instance HasIndicatedAirSpeed IndicatedAirSpeed where
+  indicatedAirSpeed =
     id
 
-instance HasAirSpeed Double where
-  airSpeed =
+instance HasIndicatedAirSpeed Double where
+  indicatedAirSpeed =
     from _Wrapped
 
 data PressureAltitudeTemperatureAirSpeed =
@@ -130,8 +130,8 @@ data PressureAltitudeTemperatureAirSpeed =
       PressureAltitude
   , temp ::
       Temperature
-  , airspeed ::
-      AirSpeed
+  , indicatedAirspeed ::
+      IndicatedAirSpeed
   }
   deriving (Eq, Ord, Show)
 
@@ -147,8 +147,8 @@ instance HasTemperature PressureAltitudeTemperatureAirSpeed where
       (\(PressureAltitudeTemperatureAirSpeed _ t _) -> t)
       (\(PressureAltitudeTemperatureAirSpeed p _ a) t -> PressureAltitudeTemperatureAirSpeed p t a)
 
-instance HasAirSpeed PressureAltitudeTemperatureAirSpeed where
-  airSpeed =
+instance HasIndicatedAirSpeed PressureAltitudeTemperatureAirSpeed where
+  indicatedAirSpeed =
     lens
       (\(PressureAltitudeTemperatureAirSpeed _ _ a) -> a)
       (\(PressureAltitudeTemperatureAirSpeed p t _) a -> PressureAltitudeTemperatureAirSpeed p t a)
@@ -157,16 +157,16 @@ makeWrapped ''TrueAirspeed
 makeWrapped ''DensityAltitude
 makeWrapped ''PressureAltitude
 makeWrapped ''Temperature
-makeWrapped ''AirSpeed
+makeWrapped ''IndicatedAirSpeed
 makeClassy ''TrueAirspeedDensityAltitude
 makeClassy ''PressureAltitudeTemperatureAirSpeed
 
 calculateTrueAirspeedDensityAltitude ::
-  (HasAirSpeed x, HasTemperature x, HasPressureAltitude x) =>
+  (HasIndicatedAirSpeed x, HasTemperature x, HasPressureAltitude x) =>
   x
   -> TrueAirspeedDensityAltitude
 calculateTrueAirspeedDensityAltitude =
-  calculateTrueAirspeedDensityAltitude' pressureAltitude temperature airSpeed
+  calculateTrueAirspeedDensityAltitude' pressureAltitude temperature indicatedAirSpeed
 
 calculateTrueAirspeedDensityAltitude' ::
   (
@@ -182,10 +182,10 @@ calculateTrueAirspeedDensityAltitude' ::
   -> Getting ias x ias
   -> x
   -> TrueAirspeedDensityAltitude
-calculateTrueAirspeedDensityAltitude' getPressureAltitude getTemperature getAirSpeed pa_oat_ias =
+calculateTrueAirspeedDensityAltitude' getPressureAltitude getTemperature getIndicatedAirSpeed pa_oat_ias =
   let palt =  pa_oat_ias ^. getPressureAltitude
       tmp =  pa_oat_ias ^. getTemperature
-      ias =  pa_oat_ias ^. getAirSpeed
+      ias =  pa_oat_ias ^. getIndicatedAirSpeed
       speed_of_sound = 661.4788 -- knots
       pa_sealevel = 29.92 ** 0.1903 -- Pressure Altitude with constant sea level
       p = (pa_sealevel - 1.313e-5 * palt ^. _Wrapped) ** 5.255
