@@ -162,11 +162,30 @@ makeClassy ''TrueAirspeedDensityAltitude
 makeClassy ''PressureAltitudeTemperatureAirSpeed
 
 calculateTrueAirspeedDensityAltitude ::
-  HasPressureAltitudeTemperatureAirSpeed s =>
-  s
+  (HasAirSpeed x, HasTemperature x, HasPressureAltitude x) =>
+  x
   -> TrueAirspeedDensityAltitude
-calculateTrueAirspeedDensityAltitude pa_oat_ias =
-  let PressureAltitudeTemperatureAirSpeed palt tmp ias = pa_oat_ias ^. pressureAltitudeTemperatureAirSpeed
+calculateTrueAirspeedDensityAltitude =
+  calculateTrueAirspeedDensityAltitude' pressureAltitude temperature airSpeed
+
+calculateTrueAirspeedDensityAltitude' ::
+  (
+    Unwrapped temp ~ Double
+  , Unwrapped palt ~ Unwrapped temp
+  , Unwrapped ias ~ Unwrapped palt
+  , Rewrapped ias ias
+  , Rewrapped palt palt
+  , Rewrapped temp temp
+  ) =>
+  Getting palt x palt
+  -> Getting temp x temp
+  -> Getting ias x ias
+  -> x
+  -> TrueAirspeedDensityAltitude
+calculateTrueAirspeedDensityAltitude' getPressureAltitude getTemperature getAirSpeed pa_oat_ias =
+  let palt =  pa_oat_ias ^. getPressureAltitude
+      tmp =  pa_oat_ias ^. getTemperature
+      ias =  pa_oat_ias ^. getAirSpeed
       speed_of_sound = 661.4788 -- knots
       pa_sealevel = 29.92 ** 0.1903 -- Pressure Altitude with constant sea level
       p = (pa_sealevel - 1.313e-5 * palt ^. _Wrapped) ** 5.255
