@@ -25,7 +25,8 @@ library
 
   build-depends:       base >=4.8 && <4.11
                      , lens >=4.15 && <4.16
-                     , exitcode
+                     , papa >= 0.3 && < 0.4
+                     , exitcode >= 0.1.0.0 && < 1.0
 
   hs-source-dirs:      src
   default-language:    Haskell2010
@@ -44,7 +45,9 @@ executable e6b
   build-depends:
                       base >=4.8 && <4.11                    
                     , lens >=4.15 && <4.16
-                    , exitcode
+                     , papa >= 0.3 && < 0.4
+                     , exitcode >= 0.1.0.0 && < 1.0
+
   ghc-options:
                     -Wall
 
