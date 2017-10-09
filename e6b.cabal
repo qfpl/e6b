@@ -1,0 +1,67 @@
+name:                e6b
+version:             0.1.0.0
+synopsis:            E6B Flight Computer functions
+description:         E6B Flight Computer functions
+homepage:            https://github.com/qfpl/e6b
+license:             BSD3
+license-file:        LICENCE
+author:              QFPL
+maintainer:          Queensland Functional Programming Lab oᴉ˙ldɟb@llǝʞsɐɥ
+copyright:           Copyright (C) 2017 Commonwealth Scientific and Industrial Research Organisation (CSIRO)
+category:            Data, Aviation
+build-type:          Simple
+extra-source-files:  changelog.md
+cabal-version:       >=1.10
+homepage:            https://github.com/qfpl/e6b
+bug-reports:         https://github.com/qfpl/e6b/issues
+tested-with:         GHC == 7.10.3, GHC == 8.0.2, GHC == 8.2.1
+
+source-repository   head
+  type:             git
+  location:         git@github.com:qfpl/e6b.git
+
+library
+  exposed-modules:     M
+
+  build-depends:       base >=4.8 && <4.11
+                     , lens >=4.15 && <4.16
+                     , exitcode
+
+  hs-source-dirs:      src
+  default-language:    Haskell2010
+  ghc-options:         -Wall
+
+executable e6b
+  default-language:
+                    Haskell2010
+
+  hs-source-dirs:
+                    src
+
+  main-is:
+                    Main.hs
+
+  build-depends:
+                      base >=4.8 && <4.11                    
+                    , lens >=4.15 && <4.16
+                    , exitcode
+  ghc-options:
+                    -Wall
+
+  other-modules:
+                    M
+
+test-suite             tests
+  build-depends:       QuickCheck >=2.9.2 && <2.11
+                     , base >=4.8 && <4.11
+                     , checkers >=0.4.6 && <0.5
+                     , e6b
+                     , lens >=4.15 && <4.16
+                     , tasty >=0.11 && <0.12
+                     , tasty-hunit >=0.9 && <0.10
+                     , tasty-quickcheck >=0.8.4 && <0.10
+  type:                exitcode-stdio-1.0
+  main-is:             Tests.hs
+  hs-source-dirs:      test
+  default-language:    Haskell2010
+  ghc-options:         -Wall
