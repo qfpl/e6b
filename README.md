@@ -1,6 +1,6 @@
 # E6B
 
-![E6B](https://i.imgur.com/356EHT6.png)
+<a href="https://i.imgur.com/R4HR4NY.jpg"><img src="https://i.imgur.com/R4HR4NY.jpg" alt="E6B" style="width: 435px;"/></a>
 
 E6B Flight Computer functions.
 
