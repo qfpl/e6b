@@ -3,6 +3,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE RankNTypes #-}
 {-# OPTIONS_HADDOCK prune #-}
 
 module M where
@@ -69,7 +70,7 @@ data PressureAltitude =
   PressureAltitude
     Double
   deriving (Eq, Ord, Show)
-    
+
 class HasPressureAltitude a where
   pressureAltitude ::
     Lens'
