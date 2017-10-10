@@ -32,15 +32,15 @@ lensTrueAirspeed =
                 VelocityUnit
                 -> a
               factor Knot =
-                0.00029529983071445
-              factor KilometreHour =
                 1
+              factor KilometreHour =
+                1.852
               factor StatuteMileHour =
-                2.036025
+                1.15078
               factor MetreSecond =
-                0.0393701
+                0.514444
               factor FootSecond =
-                29.9213
+                1.687808398944992
               v' =
                 factor v
               w' =
