@@ -48,12 +48,9 @@ instance HasDensityAltitude Double where
     from _Wrapped
 
 data TrueAirspeedDensityAltitude =
-  TrueAirspeedDensityAltitude {
-    tas ::
-      TrueAirspeed
-  , da ::
-      DensityAltitude
-  }
+  TrueAirspeedDensityAltitude
+    TrueAirspeed
+    DensityAltitude
   deriving (Eq, Ord, Show)
 
 instance HasTrueAirspeed TrueAirspeedDensityAltitude where
@@ -126,14 +123,10 @@ instance HasIndicatedAirSpeed Double where
     from _Wrapped
 
 data PressureAltitudeTemperatureAirSpeed =
-  PressureAltitudeTemperatureAirSpeed {
-    pa ::
-      PressureAltitude
-  , temp ::
-      Temperature
-  , indicatedAirspeed ::
-      IndicatedAirSpeed
-  }
+  PressureAltitudeTemperatureAirSpeed
+    PressureAltitude
+    Temperature
+    IndicatedAirSpeed
   deriving (Eq, Ord, Show)
 
 instance HasPressureAltitude PressureAltitudeTemperatureAirSpeed where
@@ -154,6 +147,87 @@ instance HasIndicatedAirSpeed PressureAltitudeTemperatureAirSpeed where
       (\(PressureAltitudeTemperatureAirSpeed _ _ a) -> a)
       (\(PressureAltitudeTemperatureAirSpeed p t _) a -> PressureAltitudeTemperatureAirSpeed p t a)
 
+data Altitude =
+  Altitude
+    Double
+  deriving (Eq, Ord, Show)
+
+class HasAltitude a where
+  altitude ::
+    Lens'
+      a
+      Altitude
+
+instance HasAltitude Altitude where
+  altitude =
+    id
+
+instance HasAltitude Double where
+  altitude =
+    from _Wrapped
+
+data QNH =
+  QNH
+    Double
+  deriving (Eq, Ord, Show)
+
+class HasQNH a where
+  qnh ::
+    Lens'
+      a
+      QNH
+
+instance HasQNH QNH where
+  qnh =
+    id
+
+instance HasQNH Double where
+  qnh =
+    from _Wrapped
+
+data AltitudeQNHTemperature =
+  AltitudeQNHTemperature
+    Altitude
+    QNH
+    Temperature
+  deriving (Eq, Ord, Show)
+
+instance HasAltitude AltitudeQNHTemperature where
+  altitude =
+    lens
+      (\(AltitudeQNHTemperature a _ _) -> a)
+      (\(AltitudeQNHTemperature _ q t) a -> AltitudeQNHTemperature a q t)
+
+instance HasQNH AltitudeQNHTemperature where
+  qnh =
+    lens
+      (\(AltitudeQNHTemperature _ q _) -> q)
+      (\(AltitudeQNHTemperature a _ t) q -> AltitudeQNHTemperature a q t)
+
+instance HasTemperature AltitudeQNHTemperature where
+  temperature =
+    lens
+      (\(AltitudeQNHTemperature _ _ t) -> t)
+      (\(AltitudeQNHTemperature a q _) t -> AltitudeQNHTemperature a q t)
+
+data DensityAltitudePressureAltitude =
+  DensityAltitudePressureAltitude
+    DensityAltitude
+    PressureAltitude
+  deriving (Eq, Ord, Show)
+
+instance HasDensityAltitude DensityAltitudePressureAltitude where
+  densityAltitude =
+    lens
+      (\(DensityAltitudePressureAltitude d _) -> d)
+      (\(DensityAltitudePressureAltitude _ p) d -> DensityAltitudePressureAltitude d p)
+
+instance HasPressureAltitude DensityAltitudePressureAltitude where
+  pressureAltitude =
+    lens
+      (\(DensityAltitudePressureAltitude _ p) -> p)
+      (\(DensityAltitudePressureAltitude d _) p -> DensityAltitudePressureAltitude d p)
+
 makeWrapped ''TrueAirspeed
 makeWrapped ''DensityAltitude
 makeWrapped ''PressureAltitude
@@ -161,6 +235,10 @@ makeWrapped ''Temperature
 makeWrapped ''IndicatedAirSpeed
 makeClassy ''TrueAirspeedDensityAltitude
 makeClassy ''PressureAltitudeTemperatureAirSpeed
+makeWrapped ''Altitude
+makeWrapped ''QNH
+makeClassy ''AltitudeQNHTemperature
+makeClassy ''DensityAltitudePressureAltitude
 
 calculateTrueAirspeedDensityAltitude ::
   (HasIndicatedAirSpeed x, HasTemperature x, HasPressureAltitude x) =>
@@ -171,11 +249,11 @@ calculateTrueAirspeedDensityAltitude =
 
 calculateTrueAirspeedDensityAltitude' ::
   (
-    Unwrapped temp ~ Double
-  , Unwrapped palt ~ Unwrapped temp
+    Unwrapped palt ~ Unwrapped temp
+  , Unwrapped temp ~ Double
   , Unwrapped ias ~ Unwrapped palt
-  , Rewrapped ias ias
   , Rewrapped palt palt
+  , Rewrapped ias ias
   , Rewrapped temp temp
   ) =>
   Getting palt x palt
@@ -184,9 +262,9 @@ calculateTrueAirspeedDensityAltitude' ::
   -> x
   -> TrueAirspeedDensityAltitude
 calculateTrueAirspeedDensityAltitude' getPressureAltitude getTemperature getIndicatedAirSpeed pa_oat_ias =
-  let palt =  pa_oat_ias ^. getPressureAltitude
-      tmp =  pa_oat_ias ^. getTemperature
-      ias =  pa_oat_ias ^. getIndicatedAirSpeed
+  let palt = pa_oat_ias ^. getPressureAltitude
+      tmp = pa_oat_ias ^. getTemperature
+      ias = pa_oat_ias ^. getIndicatedAirSpeed
       speed_of_sound = 661.4788 -- knots
       pa_sealevel = 29.92 ** 0.1903 -- Pressure Altitude with constant sea level
       p = (pa_sealevel - 1.313e-5 * palt ^. _Wrapped) ** 5.255
@@ -198,3 +276,34 @@ calculateTrueAirspeedDensityAltitude' getPressureAltitude getTemperature getIndi
       es = speed_of_sound * mach -- effective airspeed
       ts = es * sqrt ((tmp ^. _Wrapped) / 288.15)
   in  TrueAirspeedDensityAltitude (_Wrapped # ts) (_Wrapped # dalt)
+
+calculateDensityAltitudePressureAltitude ::
+  (HasAltitude s, HasQNH s, HasTemperature s) =>
+  s
+  -> DensityAltitudePressureAltitude
+calculateDensityAltitudePressureAltitude =
+  calculateDensityAltitudePressureAltitude' altitude qnh temperature
+
+calculateDensityAltitudePressureAltitude' ::
+  (
+    Unwrapped alt ~ Double
+  , Unwrapped qnh ~ Double
+  , Unwrapped temp ~ Double
+  , Rewrapped alt alt
+  , Rewrapped qnh qnh
+  , Rewrapped temp temp) =>
+  Getting alt x alt
+  -> Getting qnh x qnh
+  -> Getting temp x temp
+  -> x
+  -> DensityAltitudePressureAltitude
+calculateDensityAltitudePressureAltitude' getAltitude getQNH getTemperature alt_qnh_temp =
+  let alt = alt_qnh_temp ^. getAltitude
+      q = alt_qnh_temp ^. getQNH
+      tmp = alt_qnh_temp ^. getTemperature
+      ea = ((q ^. _Wrapped) ** 0.1903) - (1.313e-5 * (alt ^. _Wrapped))
+      pr = ea ** 5.255
+      isatemp = (pr / 29.92) / (tmp ^. _Wrapped / 288.15)
+      da = 145442.156 * (1 - (isatemp ** 0.234969))
+      pa = ((29.92 ** 0.1903) - ea) / 1.313e-5
+  in  DensityAltitudePressureAltitude (_Wrapped # da) (_Wrapped # pa)
