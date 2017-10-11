@@ -17,7 +17,7 @@ data DistanceUnit =
   | Millimetre
   | Micrometre
   | Nanometre
-  | Mile
+  | StatuteMile
   | Yard
   | Foot
   | Inch
@@ -50,7 +50,7 @@ factorDistanceUnit f t a =
         1852000000
       factor Nanometre =
         1852000000000
-      factor Mile =
+      factor StatuteMile =
         1.15078
       factor Yard =
         2025.3728007
