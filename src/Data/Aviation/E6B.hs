@@ -6,14 +6,33 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE FlexibleContexts #-}
 
-module Data.Aviation.E6B where
+{-
 
-import Data.Aviation.E6B.DensityAltitude
-import Data.Aviation.E6B.IndicatedAirspeed
-import Data.Aviation.E6B.PressureAltitude
-import Data.Aviation.E6B.PressureAltitude
-import Data.Aviation.E6B.Temperature
-import Data.Aviation.E6B.TrueAirspeed
+TODO 20171011
+
+- rename lens* functions on each structure
+- write function that sets then gets on that lens
+- write lens for each constructor field e.g. PressureAltitude
+- fix calculate functions
+
+-}
+module Data.Aviation.E6B(
+  module E
+) where
+
+import Data.Aviation.E6B.DensityAltitude as E
+import Data.Aviation.E6B.DistanceUnit as E
+import Data.Aviation.E6B.IndicatedAirspeed as E
+import Data.Aviation.E6B.PressureAltitude as E
+import Data.Aviation.E6B.PressureAltitude as E
+import Data.Aviation.E6B.PressureUnit as E
+import Data.Aviation.E6B.QNH as E
+import Data.Aviation.E6B.Temperature as E
+import Data.Aviation.E6B.TemperatureUnit as E
+import Data.Aviation.E6B.TrueAirspeed as E
+import Data.Aviation.E6B.VelocityUnit as E
+
+
 import Papa
 
 data TrueAirspeedDensityAltitude tas da =
@@ -137,3 +156,4 @@ calculateTrueAirspeedDensityAltitude' getPressureAltitude getTemperature getIndi
       es = speed_of_sound * mach -- effective airspeed
       ts = es * sqrt ((tmp ^. _Wrapped) / 288.15)
   in  TrueAirspeedDensityAltitude (_Wrapped # ts) (_Wrapped # dalt)
+

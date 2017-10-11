@@ -8,7 +8,7 @@
 module Data.Aviation.E6B.PressureAltitude(
   PressureAltitude(..)
 , HasPressureAltitude(..)
-, lensPressureAltitude
+, convertPressureAltitude
 ) where
 
 import Data.Aviation.E6B.DistanceUnit(DistanceUnit, factorDistanceUnit)
@@ -22,12 +22,12 @@ data PressureAltitude a =
 
 makeClassy ''PressureAltitude
 
-lensPressureAltitude ::
+convertPressureAltitude ::
   Fractional a =>
   Lens'
     (PressureAltitude a)
     DistanceUnit
-lensPressureAltitude =
+convertPressureAltitude =
   lens
     (\(PressureAltitude _ u) -> u)
     (\(PressureAltitude a v) w -> PressureAltitude (factorDistanceUnit v w a) w)

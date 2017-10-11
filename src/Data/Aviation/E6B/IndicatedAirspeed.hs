@@ -8,7 +8,7 @@
 module Data.Aviation.E6B.IndicatedAirspeed(
   IndicatedAirspeed(..)
 , HasIndicatedAirspeed(..)
-, lensIndicatedAirspeed
+, convertIndicatedAirspeed
 ) where
 
 import Data.Aviation.E6B.VelocityUnit(VelocityUnit, factorVelocityUnit)
@@ -22,12 +22,12 @@ data IndicatedAirspeed a =
 
 makeClassy ''IndicatedAirspeed
 
-lensIndicatedAirspeed ::
+convertIndicatedAirspeed ::
   Fractional a =>
   Lens'
     (IndicatedAirspeed a)
     VelocityUnit
-lensIndicatedAirspeed =
+convertIndicatedAirspeed =
   lens
     (\(IndicatedAirspeed _ u) -> u)
     (\(IndicatedAirspeed a v) w -> IndicatedAirspeed (factorVelocityUnit v w a) w)

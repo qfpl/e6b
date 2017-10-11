@@ -8,7 +8,7 @@
 module Data.Aviation.E6B.IndicatedAltitude(
   IndicatedAltitude(..)
 , HasIndicatedAltitude(..)
-, lensIndicatedAltitude
+, convertIndicatedAltitude
 ) where
 
 import Data.Aviation.E6B.DistanceUnit(DistanceUnit, factorDistanceUnit)
@@ -22,12 +22,12 @@ data IndicatedAltitude a =
 
 makeClassy ''IndicatedAltitude
 
-lensIndicatedAltitude ::
+convertIndicatedAltitude ::
   Fractional a =>
   Lens'
     (IndicatedAltitude a)
     DistanceUnit
-lensIndicatedAltitude =
+convertIndicatedAltitude =
   lens
     (\(IndicatedAltitude _ u) -> u)
     (\(IndicatedAltitude a v) w -> IndicatedAltitude (factorDistanceUnit v w a) w)

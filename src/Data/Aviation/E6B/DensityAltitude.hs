@@ -8,7 +8,7 @@
 module Data.Aviation.E6B.DensityAltitude(
   DensityAltitude(..)
 , HasDensityAltitude(..)
-, lensDensityAltitude
+, convertDensityAltitude
 ) where
 
 import Data.Aviation.E6B.DistanceUnit(DistanceUnit, factorDistanceUnit)
@@ -22,12 +22,12 @@ data DensityAltitude a =
 
 makeClassy ''DensityAltitude
 
-lensDensityAltitude ::
+convertDensityAltitude ::
   Fractional a =>
   Lens'
     (DensityAltitude a)
     DistanceUnit
-lensDensityAltitude =
+convertDensityAltitude =
   lens
     (\(DensityAltitude _ u) -> u)
     (\(DensityAltitude a v) w -> DensityAltitude (factorDistanceUnit v w a) w)

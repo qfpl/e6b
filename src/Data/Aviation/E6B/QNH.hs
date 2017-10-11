@@ -8,7 +8,7 @@
 module Data.Aviation.E6B.QNH(
   QNH(..)
 , HasQNH(..)
-, lensQNH
+, convertQNH
 ) where
 
 import Data.Aviation.E6B.PressureUnit(PressureUnit, factorPressureUnit)
@@ -22,12 +22,12 @@ data QNH a =
 
 makeClassy ''QNH
 
-lensQNH ::
+convertQNH ::
   Fractional a =>
   Lens'
     (QNH a)
     PressureUnit
-lensQNH =
+convertQNH =
   lens
     (\(QNH _ u) -> u)
     (\(QNH a v) w -> QNH (factorPressureUnit v w a) w)

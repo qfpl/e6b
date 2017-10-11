@@ -8,7 +8,7 @@
 module Data.Aviation.E6B.TrueAirspeed(
   TrueAirspeed(..)
 , HasTrueAirspeed(..)
-, lensTrueAirspeed
+, convertTrueAirspeed
 ) where
 
 import Data.Aviation.E6B.VelocityUnit(VelocityUnit, factorVelocityUnit)
@@ -22,12 +22,12 @@ data TrueAirspeed a =
 
 makeClassy ''TrueAirspeed
 
-lensTrueAirspeed ::
+convertTrueAirspeed ::
   Fractional a =>
   Lens'
     (TrueAirspeed a)
     VelocityUnit
-lensTrueAirspeed =
+convertTrueAirspeed =
   lens
     (\(TrueAirspeed _ u) -> u)
     (\(TrueAirspeed a v) w -> TrueAirspeed (factorVelocityUnit v w a) w)

@@ -8,7 +8,7 @@
 module Data.Aviation.E6B.Temperature(
   Temperature(..)
 , HasTemperature(..)
-, lensTemperature
+, convertTemperature
 ) where
 
 import Data.Aviation.E6B.TemperatureUnit(TemperatureUnit, factorTemperatureUnit)
@@ -22,12 +22,12 @@ data Temperature a =
 
 makeClassy ''Temperature
 
-lensTemperature ::
+convertTemperature ::
   Fractional a =>
   Lens'
     (Temperature a)
     TemperatureUnit
-lensTemperature =
+convertTemperature =
   lens
     (\(Temperature _ u) -> u)
     (\(Temperature a v) w -> Temperature (factorTemperatureUnit v w a) w)
