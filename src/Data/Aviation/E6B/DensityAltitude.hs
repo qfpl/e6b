@@ -5,30 +5,30 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE FlexibleInstances #-}
 
-module Data.Aviation.E6B.PressureAltitude(
+module Data.Aviation.E6B.DensityAltitude(
   PressureUnit(..)
-, PressureAltitude(..)
-, HasPressureAltitude(..)
-, lensPressureAltitude
+, DensityAltitude(..)
+, HasDensityAltitude(..)
+, lensDensityAltitude
 ) where
 
 import Data.Aviation.E6B.PressureUnit(PressureUnit(Pascal, InHg, Psi, Torr, Atmosphere, Bar), factorPressureUnit)
 import Papa
 
-data PressureAltitude a =
-  PressureAltitude
+data DensityAltitude a =
+  DensityAltitude
     a
     PressureUnit
   deriving (Eq, Ord, Show)
 
-makeClassy ''PressureAltitude
+makeClassy ''DensityAltitude
 
-lensPressureAltitude ::
+lensDensityAltitude ::
   Fractional a =>
   Lens'
-    (PressureAltitude a)
+    (DensityAltitude a)
     PressureUnit
-lensPressureAltitude =
+lensDensityAltitude =
   lens
-    (\(PressureAltitude _ u) -> u)
-    (\(PressureAltitude a v) w -> PressureAltitude (factorPressureUnit v w a) w)
+    (\(DensityAltitude _ u) -> u)
+    (\(DensityAltitude a v) w -> DensityAltitude (factorPressureUnit v w a) w)

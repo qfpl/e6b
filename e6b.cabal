@@ -22,12 +22,14 @@ source-repository   head
 
 library
   exposed-modules:    M
+                    , Data.Aviation.E6B.DensityAltitude
                     , Data.Aviation.E6B.PressureAltitude 
                     , Data.Aviation.E6B.PressureUnit
+                    , Data.Aviation.E6B.TemperatureUnit
                     , Data.Aviation.E6B.TrueAirspeed
                     , Data.Aviation.E6B.VelocityUnit
 
-  build-depends:       base >=4.8 && <4.11
+  build-depends:      base >=4.8 && <4.11
                     , lens >=4.15 && <4.16
                     , papa >= 0.3 && < 0.4
                     , exitcode >= 0.1.0.0 && < 1.0
