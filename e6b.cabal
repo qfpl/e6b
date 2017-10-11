@@ -23,6 +23,7 @@ source-repository   head
 library
   exposed-modules:    M
                     , Data.Aviation.E6B.DensityAltitude
+                    , Data.Aviation.E6B.DistanceUnit
                     , Data.Aviation.E6B.PressureAltitude 
                     , Data.Aviation.E6B.PressureUnit
                     , Data.Aviation.E6B.TemperatureUnit
