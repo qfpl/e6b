@@ -35,13 +35,13 @@ factorVelocityUnit f t a =
       factor Knot =
         1
       factor KilometreHour =
-        1.852
+        0.539960631749
       factor StatuteMileHour =
-        1.15078
+        0.868976
       factor MetreSecond =
-        0.514444
+        1.943843951320815
       factor FootSecond =
-        1.687808398944992
+        0.59248363636258449816
       f' =
         factor f
       t' =

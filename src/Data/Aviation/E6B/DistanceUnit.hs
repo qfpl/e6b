@@ -39,25 +39,25 @@ factorDistanceUnit f t a =
         DistanceUnit
         -> a
       factor Kilometre =
-        1.852
+        0.539960631749
       factor Metre =
-        1852
+        5.39960631749e-4
       factor Centimetre =
-        185200
+        5.39960631749e-6
       factor Millimetre =
-        1852000
+        5.39960631749e-7
       factor Micrometre =
-        1852000000
+        5.39960631749e-10
       factor Nanometre =
-        1852000000000
+        5.39960631749e-13
       factor StatuteMile =
-        1.15078
+        0.868976
       factor Yard =
-        2025.3728007
+        0.000493737
       factor Foot =
-        6076.118402099979903
+        0.000164579
       factor Inch =
-        72913.420825199762476
+        1.3715e-5
       factor NauticalMile =
         1
       f' =
