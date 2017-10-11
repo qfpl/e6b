@@ -6,13 +6,12 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module Data.Aviation.E6B.PressureAltitude(
-  DistanceUnit(..)
-, PressureAltitude(..)
+  PressureAltitude(..)
 , HasPressureAltitude(..)
 , lensPressureAltitude
 ) where
 
-import Data.Aviation.E6B.DistanceUnit(DistanceUnit(Kilometre, Metre, Centimetre, Millimetre, Micrometre, Nanometre, StatuteMile, Yard, Foot, Inch, NauticalMile), factorDistanceUnit)
+import Data.Aviation.E6B.DistanceUnit(DistanceUnit, factorDistanceUnit)
 import Papa
 
 data PressureAltitude a =

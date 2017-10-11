@@ -12,6 +12,7 @@ import Papa
 
 data PressureUnit =
   Pascal
+  | Hectopascal
   | InHg
   | Psi
   | Torr
@@ -35,6 +36,8 @@ factorPressureUnit f t a =
         -> a
       factor Pascal =
         0.00029529983071445
+      factor Hectopascal =
+        0.029529983071445
       factor InHg =
         1
       factor Psi =

@@ -6,19 +6,18 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module Data.Aviation.E6B.DensityAltitude(
-  PressureUnit(..)
-, DensityAltitude(..)
+  DensityAltitude(..)
 , HasDensityAltitude(..)
 , lensDensityAltitude
 ) where
 
-import Data.Aviation.E6B.PressureUnit(PressureUnit(Pascal, InHg, Psi, Torr, Atmosphere, Bar), factorPressureUnit)
+import Data.Aviation.E6B.DistanceUnit(DistanceUnit, factorDistanceUnit)
 import Papa
 
 data DensityAltitude a =
   DensityAltitude
     a
-    PressureUnit
+    DistanceUnit
   deriving (Eq, Ord, Show)
 
 makeClassy ''DensityAltitude
@@ -27,8 +26,8 @@ lensDensityAltitude ::
   Fractional a =>
   Lens'
     (DensityAltitude a)
-    PressureUnit
+    DistanceUnit
 lensDensityAltitude =
   lens
     (\(DensityAltitude _ u) -> u)
-    (\(DensityAltitude a v) w -> DensityAltitude (factorPressureUnit v w a) w)
+    (\(DensityAltitude a v) w -> DensityAltitude (factorDistanceUnit v w a) w)

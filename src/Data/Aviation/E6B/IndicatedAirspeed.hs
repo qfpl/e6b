@@ -6,13 +6,12 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module Data.Aviation.E6B.IndicatedAirspeed(
-  VelocityUnit(..)
-, IndicatedAirspeed(..)
+  IndicatedAirspeed(..)
 , HasIndicatedAirspeed(..)
 , lensIndicatedAirspeed
 ) where
 
-import Data.Aviation.E6B.VelocityUnit(VelocityUnit(Knot, KilometreHour, StatuteMileHour, MetreSecond, FootSecond), factorVelocityUnit)
+import Data.Aviation.E6B.VelocityUnit(VelocityUnit, factorVelocityUnit)
 import Papa
 
 data IndicatedAirspeed a =

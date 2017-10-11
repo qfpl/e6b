@@ -6,13 +6,12 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module Data.Aviation.E6B.TrueAirspeed(
-  VelocityUnit(..)
-, TrueAirspeed(..)
+  TrueAirspeed(..)
 , HasTrueAirspeed(..)
 , lensTrueAirspeed
 ) where
 
-import Data.Aviation.E6B.VelocityUnit(VelocityUnit(Knot, KilometreHour, StatuteMileHour, MetreSecond, FootSecond), factorVelocityUnit)
+import Data.Aviation.E6B.VelocityUnit(VelocityUnit, factorVelocityUnit)
 import Papa
 
 data TrueAirspeed a =

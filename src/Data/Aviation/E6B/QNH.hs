@@ -6,13 +6,12 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module Data.Aviation.E6B.QNH(
-  PressureUnit(..)
-, QNH(..)
+  QNH(..)
 , HasQNH(..)
 , lensQNH
 ) where
 
-import Data.Aviation.E6B.PressureUnit(PressureUnit(Pascal, InHg, Psi, Torr, Atmosphere, Bar), factorPressureUnit)
+import Data.Aviation.E6B.PressureUnit(PressureUnit, factorPressureUnit)
 import Papa
 
 data QNH a =

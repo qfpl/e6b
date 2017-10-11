@@ -6,13 +6,12 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module Data.Aviation.E6B.Temperature(
-  TemperatureUnit(..)
-, Temperature(..)
+  Temperature(..)
 , HasTemperature(..)
 , lensTemperature
 ) where
 
-import Data.Aviation.E6B.TemperatureUnit(TemperatureUnit(Celsius, Fahrenheit, Kelvin), factorTemperatureUnit)
+import Data.Aviation.E6B.TemperatureUnit(TemperatureUnit, factorTemperatureUnit)
 import Papa
 
 data Temperature a =
