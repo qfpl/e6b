@@ -9,9 +9,10 @@ module Data.Aviation.E6B.IndicatedAltitude(
   IndicatedAltitude(..)
 , HasIndicatedAltitude(..)
 , convertIndicatedAltitude
+, indicatedAltitudeValue
 ) where
 
-import Data.Aviation.E6B.DistanceUnit(DistanceUnit, factorDistanceUnit)
+import Data.Aviation.E6B.DistanceUnit(DistanceUnit, HasDistanceUnit(distanceUnit), factorDistanceUnit)
 import Papa
 
 data IndicatedAltitude a =
@@ -21,6 +22,23 @@ data IndicatedAltitude a =
   deriving (Eq, Ord, Show)
 
 makeClassy ''IndicatedAltitude
+
+instance HasDistanceUnit (IndicatedAltitude a) where
+  distanceUnit =
+    lens
+      (\(IndicatedAltitude _ u) -> u)
+      (\(IndicatedAltitude a _) u -> IndicatedAltitude a u)
+
+indicatedAltitudeValue ::
+  Lens
+    (IndicatedAltitude a)
+    (IndicatedAltitude b)
+    a
+    b
+indicatedAltitudeValue =
+  lens
+    (\(IndicatedAltitude a _) -> a)
+    (\(IndicatedAltitude _ u) a -> IndicatedAltitude a u)
 
 convertIndicatedAltitude ::
   Fractional a =>

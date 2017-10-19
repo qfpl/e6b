@@ -8,10 +8,11 @@
 module Data.Aviation.E6B.Temperature(
   Temperature(..)
 , HasTemperature(..)
+, temperatureValue
 , convertTemperature
 ) where
 
-import Data.Aviation.E6B.TemperatureUnit(TemperatureUnit, factorTemperatureUnit)
+import Data.Aviation.E6B.TemperatureUnit(TemperatureUnit, HasTemperatureUnit(temperatureUnit), factorTemperatureUnit)
 import Papa
 
 data Temperature a =
@@ -21,6 +22,23 @@ data Temperature a =
   deriving (Eq, Ord, Show)
 
 makeClassy ''Temperature
+
+instance HasTemperatureUnit (Temperature a) where
+  temperatureUnit =
+    lens
+      (\(Temperature _ u) -> u)
+      (\(Temperature a _) u -> Temperature a u)
+
+temperatureValue ::
+  Lens
+    (Temperature a)
+    (Temperature b)
+    a
+    b
+temperatureValue =
+  lens
+    (\(Temperature a _) -> a)
+    (\(Temperature _ u) a -> Temperature a u)
 
 convertTemperature ::
   Fractional a =>

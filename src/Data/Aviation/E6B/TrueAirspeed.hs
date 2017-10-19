@@ -8,10 +8,11 @@
 module Data.Aviation.E6B.TrueAirspeed(
   TrueAirspeed(..)
 , HasTrueAirspeed(..)
+, trueAirspeedValue
 , convertTrueAirspeed
 ) where
 
-import Data.Aviation.E6B.VelocityUnit(VelocityUnit, factorVelocityUnit)
+import Data.Aviation.E6B.VelocityUnit(VelocityUnit, HasVelocityUnit(velocityUnit), factorVelocityUnit)
 import Papa
 
 data TrueAirspeed a =
@@ -21,6 +22,23 @@ data TrueAirspeed a =
   deriving (Eq, Ord, Show)
 
 makeClassy ''TrueAirspeed
+
+instance HasVelocityUnit (TrueAirspeed a) where
+  velocityUnit =
+    lens
+      (\(TrueAirspeed _ u) -> u)
+      (\(TrueAirspeed a _) u -> TrueAirspeed a u)
+
+trueAirspeedValue ::
+  Lens
+    (TrueAirspeed a)
+    (TrueAirspeed b)
+    a
+    b
+trueAirspeedValue =
+  lens
+    (\(TrueAirspeed a _) -> a)
+    (\(TrueAirspeed _ u) a -> TrueAirspeed a u)
 
 convertTrueAirspeed ::
   Fractional a =>
