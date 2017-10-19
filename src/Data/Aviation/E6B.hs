@@ -141,9 +141,9 @@ calculateTrueAirspeedDensityAltitude' :: (Unwrapped
                                          -> TrueAirspeedDensityAltitude tas da
 
 calculateTrueAirspeedDensityAltitude' getPressureAltitude getTemperature getIndicatedAirspeed pa_oat_ias =
-  let palt = pa_oat_ias ^. getPressureAltitude
-      tmp = pa_oat_ias ^. getTemperature
-      ias = pa_oat_ias ^. getIndicatedAirspeed
+  let palt = pa_oat_ias ^. getPressureAltitude -- feet
+      tmp = pa_oat_ias ^. getTemperature -- kelvin
+      ias = pa_oat_ias ^. getIndicatedAirspeed -- knots
       speed_of_sound = 661.4788 -- knots
 
       pa_sealevel = 29.92 ** 0.1903 -- Pressure Altitude with constant sea level
