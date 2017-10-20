@@ -140,22 +140,6 @@ instance HasTemperature (IndicatedAltitudeQNHTemperature ia qnh tmp) tmp where
 
 ----
 
-test1 ::
-  IndicatedAirspeedPressureAltitudeTemperature Double Double Double
-test1 =
-  IndicatedAirspeedPressureAltitudeTemperature
-    (IndicatedAirspeed 105 Knot)
-    (PressureAltitude 1000 Metre)
-    (Temperature 25 Celsius)
-
-test2 ::
-  IndicatedAirspeedPressureAltitudeTemperature Double Double Double
-test2 =
-  IndicatedAirspeedPressureAltitudeTemperature
-    (IndicatedAirspeed 120 Knot)
-    (PressureAltitude 8000 Foot)
-    (Temperature 288.15 Kelvin)
-
 calculateTrueAirspeedDensityAltitude ::
   (
     Floating a
