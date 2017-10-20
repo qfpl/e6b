@@ -104,56 +104,86 @@ instance HasPressureAltitude (DensityAltitudePressureAltitude da pa) pa where
 
 ----
 
-calculateTrueAirspeedDensityAltitude :: (Unwrapped (IndicatedAirspeed a)
-      ~
-      Unwrapped (DensityAltitude da),
-      Unwrapped (PressureAltitude a2) ~ Unwrapped (DensityAltitude da),
-      Unwrapped (Temperature a1) ~ Unwrapped (DensityAltitude da),
-      Unwrapped (TrueAirspeed tas) ~ Unwrapped (DensityAltitude da),
-      HasIndicatedAirspeed s2 a, HasTemperature s2 a1,
-      HasPressureAltitude s2 a2,
-      Rewrapped (IndicatedAirspeed a) (IndicatedAirspeed a),
-      Rewrapped (PressureAltitude a2) (PressureAltitude a2),
-      Rewrapped (Temperature a1) (Temperature a1),
-      Rewrapped (TrueAirspeed tas) (TrueAirspeed tas),
-      Rewrapped (DensityAltitude da) (DensityAltitude da),
-      Floating (Unwrapped (DensityAltitude da))) =>
-     s2 -> TrueAirspeedDensityAltitude tas da
-calculateTrueAirspeedDensityAltitude =
-  calculateTrueAirspeedDensityAltitude' pressureAltitude temperature indicatedAirspeed
+test1 ::
+  IndicatedAirspeedPressureAltitudeTemperature Double Double Double
+test1 =
+  IndicatedAirspeedPressureAltitudeTemperature
+    (IndicatedAirspeed 105 Knot)
+    (PressureAltitude 1000 Metre)
+    (Temperature 25 Celsius)
 
+test2 ::
+  IndicatedAirspeedPressureAltitudeTemperature Double Double Double
+test2 =
+  IndicatedAirspeedPressureAltitudeTemperature
+    (IndicatedAirspeed 120 Knot)
+    (PressureAltitude 8000 Foot)
+    (Temperature 288.15 Kelvin)
 
-calculateTrueAirspeedDensityAltitude' :: (Unwrapped
-                                            (TrueAirspeed tas)
-                                          ~
-                                          Unwrapped (DensityAltitude da),
-                                          Unwrapped s1 ~ Unwrapped (TrueAirspeed tas),
-                                          Unwrapped s3 ~ Unwrapped s1,
-                                          Unwrapped s ~ Unwrapped s3,
-                                          Floating (Unwrapped (DensityAltitude da)),
-                                          Rewrapped (DensityAltitude da) (DensityAltitude da),
-                                          Rewrapped (TrueAirspeed tas) (TrueAirspeed tas),
-                                          Rewrapped s1 s1, Rewrapped s3 s3, Rewrapped s s) =>
-                                         Getting s3 s2 s3
-                                         -> Getting s1 s2 s1
-                                         -> Getting s s2 s
-                                         -> s2
-                                         -> TrueAirspeedDensityAltitude tas da
+calculateTrueAirspeedDensityAltitude ::
+  (
+    Floating a
+  , HasPressureAltitude s a
+  , HasTemperature s a
+  , HasIndicatedAirspeed s a
+  ) =>
+  s
+  -> TrueAirspeedDensityAltitude a a
+calculateTrueAirspeedDensityAltitude x =
+  calculateTrueAirspeedDensityAltitude' pressureAltitude temperature indicatedAirspeed x
 
+calculateTrueAirspeedDensityAltitude' ::
+  Floating a =>
+  Getting (PressureAltitude a) s (PressureAltitude a)
+  -> Getting (Temperature a) s (Temperature a)
+  -> Getting (IndicatedAirspeed a) s (IndicatedAirspeed a)
+  -> s
+  -> TrueAirspeedDensityAltitude a a
 calculateTrueAirspeedDensityAltitude' getPressureAltitude getTemperature getIndicatedAirspeed pa_oat_ias =
-  let palt = pa_oat_ias ^. getPressureAltitude -- feet
-      tmp = pa_oat_ias ^. getTemperature -- kelvin
-      ias = pa_oat_ias ^. getIndicatedAirspeed -- knots
+  let palt = view pressureAltitudeValue . set convertPressureAltitude Foot . view getPressureAltitude $ pa_oat_ias
+      tmp = view temperatureValue . set convertTemperature Kelvin . view getTemperature $ pa_oat_ias
+      ias = view indicatedAirspeedValue . set convertIndicatedAirspeed Knot . view getIndicatedAirspeed $ pa_oat_ias
       speed_of_sound = 661.4788 -- knots
-
       pa_sealevel = 29.92 ** 0.1903 -- Pressure Altitude with constant sea level
-      p = (pa_sealevel - 1.313e-5 * palt ^. _Wrapped) ** 5.255
-      dalt = (1 - ((p / 29.92) / (tmp ^. _Wrapped / 288.15)) ** 0.234969) * 145442.156
-      soundspeed = ias ^. _Wrapped / speed_of_sound
+      p = (pa_sealevel - 1.313e-5 * palt) ** 5.255
+      dalt = (1 - ((p / 29.92) / (tmp / 288.15)) ** 0.234969) * 145442.156
+      soundspeed = ias / speed_of_sound
       css = (soundspeed * soundspeed) / 5 + 1
       qc = (css ** 3.5 - 1) * 29.92126 -- impact pressure on pitot tube
       mach = sqrt (5 * ((qc / p + 1) ** (2/7) - 1))
       es = speed_of_sound * mach -- effective airspeed
-      ts = es * sqrt ((tmp ^. _Wrapped) / 288.15)
-  in  TrueAirspeedDensityAltitude (_Wrapped # ts) (_Wrapped # dalt)
+      ts = es * sqrt (tmp / 288.15)
+  in  TrueAirspeedDensityAltitude (TrueAirspeed ts Knot) (DensityAltitude dalt Foot)
 
+{-
+calculateDensityAltitudePressureAltitude ::
+  -- (HasAltitude s, HasQNH s, HasTemperature s) =>
+  Double
+  -> DensityAltitudePressureAltitude
+calculateDensityAltitudePressureAltitude =
+  calculateDensityAltitudePressureAltitude' altitude qnh temperature
+
+calculateDensityAltitudePressureAltitude' ::
+  (
+    Unwrapped alt ~ Double
+  , Unwrapped qnh ~ Double
+  , Unwrapped temp ~ Double
+  , Rewrapped alt alt
+  , Rewrapped qnh qnh
+  , Rewrapped temp temp) =>
+  Getting alt Double alt
+  -> Getting qnh Double qnh
+  -> Getting temp Double temp
+  -> Double
+  -> DensityAltitudePressureAltitude
+calculateDensityAltitudePressureAltitude' getAltitude getQNH getTemperature alt_qnh_temp =
+  let alt = alt_qnh_temp ^. getAltitude
+      q = alt_qnh_temp ^. getQNH
+      tmp = alt_qnh_temp ^. getTemperature
+      ea = ((q ^. _Wrapped) ** 0.1903) - (1.313e-5 * (alt ^. _Wrapped))
+      pr = ea ** 5.255
+      isatemp = (pr / 29.92) / (tmp ^. _Wrapped / 288.15)
+      da = 145442.156 * (1 - (isatemp ** 0.234969))
+      pa = ((29.92 ** 0.1903) - ea) / 1.313e-5
+  in  DensityAltitudePressureAltitude (_Wrapped # da) (_Wrapped # pa)
+-}
