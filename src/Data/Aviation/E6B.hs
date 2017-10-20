@@ -18,11 +18,20 @@ TODO 20171011
 -}
 module Data.Aviation.E6B(
   module E
+, TrueAirspeedDensityAltitude(..)
+, IndicatedAirspeedPressureAltitudeTemperature(..)
+, DensityAltitudePressureAltitude(..)
+, IndicatedAltitudeQNHTemperature(..)
+, calculateTrueAirspeedDensityAltitude
+, calculateTrueAirspeedDensityAltitude'
+, calculateDensityAltitudePressureAltitude
+, calculateDensityAltitudePressureAltitude'
 ) where
 
 import Data.Aviation.E6B.DensityAltitude as E
 import Data.Aviation.E6B.DistanceUnit as E
 import Data.Aviation.E6B.IndicatedAirspeed as E
+import Data.Aviation.E6B.IndicatedAltitude as E
 import Data.Aviation.E6B.PressureAltitude as E
 import Data.Aviation.E6B.PressureAltitude as E
 import Data.Aviation.E6B.PressureUnit as E
@@ -102,6 +111,33 @@ instance HasPressureAltitude (DensityAltitudePressureAltitude da pa) pa where
       (\(DensityAltitudePressureAltitude _ p) -> p)
       (\(DensityAltitudePressureAltitude d _) p -> DensityAltitudePressureAltitude d p)
 
+data IndicatedAltitudeQNHTemperature ia qnh tmp =
+  IndicatedAltitudeQNHTemperature
+    (IndicatedAltitude ia)
+    (QNH qnh)
+    (Temperature tmp)
+  deriving (Eq, Ord, Show)
+
+makeClassy ''IndicatedAltitudeQNHTemperature
+
+instance HasIndicatedAltitude (IndicatedAltitudeQNHTemperature ia qnh tmp) ia where
+  indicatedAltitude =
+    lens
+      (\(IndicatedAltitudeQNHTemperature i _ _) -> i)
+      (\(IndicatedAltitudeQNHTemperature _ q t) i -> IndicatedAltitudeQNHTemperature i q t)
+
+instance HasQNH (IndicatedAltitudeQNHTemperature ia qnh tmp) qnh where
+  qNH =
+    lens
+      (\(IndicatedAltitudeQNHTemperature _ q _) -> q)
+      (\(IndicatedAltitudeQNHTemperature i _ t) q -> IndicatedAltitudeQNHTemperature i q t)
+
+instance HasTemperature (IndicatedAltitudeQNHTemperature ia qnh tmp) tmp where
+  temperature =
+    lens
+      (\(IndicatedAltitudeQNHTemperature _ _ t) -> t)
+      (\(IndicatedAltitudeQNHTemperature i q _) t -> IndicatedAltitudeQNHTemperature i q t)
+
 ----
 
 test1 ::
@@ -155,35 +191,40 @@ calculateTrueAirspeedDensityAltitude' getPressureAltitude getTemperature getIndi
       ts = es * sqrt (tmp / 288.15)
   in  TrueAirspeedDensityAltitude (TrueAirspeed ts Knot) (DensityAltitude dalt Foot)
 
-{-
+test3 ::
+  IndicatedAltitudeQNHTemperature Double Double Double
+test3 =
+  IndicatedAltitudeQNHTemperature
+    (IndicatedAltitude 2000 Foot)
+    (QNH 28.92 InHg)
+    (Temperature 303.15 Kelvin)
+
 calculateDensityAltitudePressureAltitude ::
-  -- (HasAltitude s, HasQNH s, HasTemperature s) =>
-  Double
-  -> DensityAltitudePressureAltitude
-calculateDensityAltitudePressureAltitude =
-  calculateDensityAltitudePressureAltitude' altitude qnh temperature
+  (
+    Floating a
+  , HasIndicatedAltitude s a
+  , HasQNH s a
+  , HasTemperature s a
+  ) =>
+  s
+  -> DensityAltitudePressureAltitude a a
+calculateDensityAltitudePressureAltitude x =
+  calculateDensityAltitudePressureAltitude' indicatedAltitude qNH temperature x
 
 calculateDensityAltitudePressureAltitude' ::
-  (
-    Unwrapped alt ~ Double
-  , Unwrapped qnh ~ Double
-  , Unwrapped temp ~ Double
-  , Rewrapped alt alt
-  , Rewrapped qnh qnh
-  , Rewrapped temp temp) =>
-  Getting alt Double alt
-  -> Getting qnh Double qnh
-  -> Getting temp Double temp
-  -> Double
-  -> DensityAltitudePressureAltitude
-calculateDensityAltitudePressureAltitude' getAltitude getQNH getTemperature alt_qnh_temp =
-  let alt = alt_qnh_temp ^. getAltitude
-      q = alt_qnh_temp ^. getQNH
-      tmp = alt_qnh_temp ^. getTemperature
-      ea = ((q ^. _Wrapped) ** 0.1903) - (1.313e-5 * (alt ^. _Wrapped))
+  Floating a =>
+  Getting (IndicatedAltitude a) s (IndicatedAltitude a)
+  -> Getting (QNH a) s (QNH a)
+  -> Getting (Temperature a) s (Temperature a)
+  -> s
+  -> DensityAltitudePressureAltitude a a
+calculateDensityAltitudePressureAltitude' getIndicatedAltitude getQNHValue getTemperatureValue alt_qnh_temp =
+  let alt = view indicatedAltitudeValue . set convertIndicatedAltitude Foot . view getIndicatedAltitude $ alt_qnh_temp
+      q = view qnhValue . set convertQNH InHg . view getQNHValue $ alt_qnh_temp
+      tmp = view temperatureValue . set convertTemperature Kelvin . view getTemperatureValue $ alt_qnh_temp
+      ea = (q ** 0.1903) - (1.313e-5 * alt)
       pr = ea ** 5.255
-      isatemp = (pr / 29.92) / (tmp ^. _Wrapped / 288.15)
+      isatemp = (pr / 29.92) / (tmp / 288.15)
       da = 145442.156 * (1 - (isatemp ** 0.234969))
       pa = ((29.92 ** 0.1903) - ea) / 1.313e-5
-  in  DensityAltitudePressureAltitude (_Wrapped # da) (_Wrapped # pa)
--}
+  in  DensityAltitudePressureAltitude (DensityAltitude da Foot) (PressureAltitude pa Foot)
