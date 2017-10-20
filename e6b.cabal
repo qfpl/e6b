@@ -23,15 +23,19 @@ source-repository   head
 library
   exposed-modules:    Data.Aviation.E6B
                     , Data.Aviation.E6B.DensityAltitude
+                    , Data.Aviation.E6B.DensityAltitudePressureAltitude
                     , Data.Aviation.E6B.DistanceUnit
                     , Data.Aviation.E6B.IndicatedAirspeed
+                    , Data.Aviation.E6B.IndicatedAirspeedPressureAltitudeTemperature
                     , Data.Aviation.E6B.IndicatedAltitude
+                    , Data.Aviation.E6B.IndicatedAltitudeQNHTemperature
                     , Data.Aviation.E6B.PressureAltitude 
                     , Data.Aviation.E6B.PressureUnit
                     , Data.Aviation.E6B.QNH
                     , Data.Aviation.E6B.Temperature
                     , Data.Aviation.E6B.TemperatureUnit
                     , Data.Aviation.E6B.TrueAirspeed
+                    , Data.Aviation.E6B.TrueAirspeedDensityAltitude
                     , Data.Aviation.E6B.VelocityUnit
 
   build-depends:      base >=4.8 && <4.11
