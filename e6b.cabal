@@ -67,7 +67,7 @@ executable e6b
                     -Wall
 
   other-modules:
-                    M
+                    Data.Aviation.E6B
 
 test-suite          tests
   type:
