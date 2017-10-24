@@ -2,20 +2,106 @@
 
 module Main where
 
-import Control.Applicative
+import Control.Applicative hiding (option)
 import Data.Aviation.E6B
 import Data.Foldable
--- import Options.Applicative
+import Options.Applicative
 import Text.Parser.Combinators(try, optional)
 import Text.Parser.Char(CharParsing, spaces, char)
 import Text.Parser.Token(TokenParsing, naturalOrDouble)
-import Text.Parsec()
-import Papa
+import Papa hiding (option)
 
 main ::
   IO ()
 main =
-  putStrLn "e6b"
+  let im = fullDesc <> progDesc "Print a greeting for TARGET" <> header "hello - a test for optparse-applicative"
+  in  do  q <- execParser (info (hiOrByeP <**> helper) im)
+          putStrLn (show q)
+
+
+{-
+
+--a 1 --b 2 --c xyz
+
+-}
+data Hi =
+  Hi Int Int String
+  deriving (Eq, Ord, Show)
+
+hiP ::
+  Parser Hi
+hiP =
+  Hi <$>
+  option auto (long "abiga" <> short 'a' <> help "gimme a a") <*>
+  option auto (long "abigb" <> short 'b' <> help "gimme a b") <*>
+  option auto (long "abigc" <> short 'c' <> help "gimme a c")
+
+{-
+
+--d 3 --e pqr
+
+-}
+data Bye =
+  Bye Int String
+  deriving (Eq, Ord, Show)
+
+
+byeP ::
+  Parser Bye
+byeP =
+  Bye <$>
+  option auto (long "a big d" <> short 'd' <> help "gimme a d") <*>
+  option auto (long "a big e" <> short 'e' <> help "gimme a e")
+
+data HiOrBye =
+  IsHi Hi
+  | IsBye Bye
+  deriving (Eq, Ord, Show)
+
+hiOrByeP ::
+  Parser HiOrBye
+hiOrByeP =
+  (IsHi <$> hiP) <|> (IsBye <$> byeP)
+
+
+
+
+
+
+
+
+
+
+
+
+{-
+let unitOfDistanceReadM ::
+        ReadM UnitOfDistance
+      unitOfDistanceReadM =
+        let r = 
+              [
+                ("metre" , Metre')
+              , ("metres", Metre')
+              , ("meter" , Metre')
+              , ("meters", Metre')
+              , ("m"     , Metre')
+              , ("foot"  , Foot')
+              , ("feet"  , Foot')
+              , ("ft"    , Foot')
+              , ("inch"  , Inch')
+              , ("inches", Inch')
+              , ("in"    , Inch')
+              ]
+        in  maybeReader (\s -> lookup s r)
+      fields ::
+        Mod OptionFields UnitOfDistance
+      fields =
+        long "unit-of-distance" <>
+        short 'u' <>
+        help "The unit of measurement of distance" <>
+        value Metre'
+        -}
+
 
 parseDensityAltitude' ::
   CharParsing f =>
