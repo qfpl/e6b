@@ -30,12 +30,20 @@ let
       sha256 = "04pmr9q70gakd327sywpxr7qp8jnl3b0y2sqxxxcj6zj2q45q38m";
     };
 
+    digit = pkgs.fetchFromGitHub {
+      owner = "qfpl";
+      repo = "digit";
+      rev = "c970c918b3cb44fb17fdc7fce7096142e944431e";
+      sha256 = "12hx79p2hrah8m344rm9a3ys0k253248vv7ykrgay7qndw1xl5wk";
+    };
+
   };
 
   modifiedHaskellPackages = haskellPackages.override {
     overrides = self: super: import sources.papa self // {
       exitcode = import sources.exitcode { inherit nixpkgs compiler; };
       tasty-hedgehog = import sources.tasty-hedgehog {};
+      digit = import sources.digit {};
     };
   };
 
