@@ -2,10 +2,11 @@
 
 module Main where
 
-import Control.Applicative hiding (option)
+import Control.Applicative
 import Data.Aviation.E6B
 import Data.Foldable
 import Options.Applicative
+import Text.Parsec(Parsec, SourceName, parse)
 import Text.Parser.Combinators(try, optional)
 import Text.Parser.Char(CharParsing, spaces, char)
 import Text.Parser.Token(TokenParsing, naturalOrDouble)
@@ -15,93 +16,64 @@ main ::
   IO ()
 main =
   let im = fullDesc <> progDesc "e6b flight computer functions for aviation" <> header "e6b flight computer"
-  in  do  q <- execParser (info (hiOrByeP <**> helper) im)
+  in  do  q <- execParser (info (parserE6BOptions <**> helper) im)
           putStrLn (show q)
 
-
-{-
-
---a 1 --b 2 --c xyz
-
--}
-data Hi =
-  Hi Int Int String
+data E6BOptions ia qnh tmp ias pa tmp' =
+  IsIndicatedAltitudeQNHTemperature (IndicatedAltitudeQNHTemperature ia qnh tmp)
+  | IsIndicatedAirspeedPressureAltitudeTemperature (IndicatedAirspeedPressureAltitudeTemperature ias pa tmp')
   deriving (Eq, Ord, Show)
 
-hiP ::
-  Parser Hi
-hiP =
-  Hi <$>
-  option auto (long "abiga" <> short 'a' <> help "gimme a a") <*>
-  option auto (long "abigb" <> short 'b' <> help "gimme a b") <*>
-  option auto (long "abigc" <> short 'c' <> help "gimme a c")
+parserE6BOptions' ::
+  Parsec String () ia
+  -> Parsec String () qnh
+  -> Parsec String () tmp
+  -> Parsec String () ias
+  -> Parsec String () pa
+  -> Parsec String () tmp'
+  -> Parser (E6BOptions ia qnh tmp ias pa tmp')
+parserE6BOptions' iaP qnhP tmpP iasP paP tmp'P =
+  IsIndicatedAltitudeQNHTemperature <$> parserIndicatedAltitudeQNHTemperature' iaP qnhP tmpP <|>
+  IsIndicatedAirspeedPressureAltitudeTemperature <$> parserIndicatedAirspeedPressureAltitudeTemperature' iasP paP tmp'P
 
-{-
+parserE6BOptions ::
+  Parser (E6BOptions Double Double Double Double Double Double)
+parserE6BOptions =
+  parserE6BOptions' parseDouble parseDouble parseDouble parseDouble parseDouble parseDouble
 
---d 3 --e pqr
+parserIndicatedAltitudeQNHTemperature' ::
+  Parsec String () ia
+  -> Parsec String () qnh
+  -> Parsec String () tmp
+  -> Parser (IndicatedAltitudeQNHTemperature ia qnh tmp)
+parserIndicatedAltitudeQNHTemperature' iaP qnhP tmpP =
+  IndicatedAltitudeQNHTemperature <$>
+  parserIndicatedAltitude iaP <*>
+  parserQNH qnhP <*>
+  parserTemperature tmpP
 
--}
-data Bye =
-  Bye Int String
-  deriving (Eq, Ord, Show)
+parserIndicatedAltitudeQNHTemperature ::
+  Parser (IndicatedAltitudeQNHTemperature Double Double Double)
+parserIndicatedAltitudeQNHTemperature =
+  parserIndicatedAltitudeQNHTemperature' parseDouble parseDouble parseDouble
 
+parserIndicatedAirspeedPressureAltitudeTemperature' ::
+  Parsec String () ias
+  -> Parsec String () pa
+  -> Parsec String () tmp
+  -> Parser (IndicatedAirspeedPressureAltitudeTemperature ias pa tmp)
+parserIndicatedAirspeedPressureAltitudeTemperature' iasP paP tmpP =
+  IndicatedAirspeedPressureAltitudeTemperature <$>
+  parserIndicatedAirspeed iasP <*>
+  parserPressureAltitude paP <*>
+  parserTemperature tmpP
 
-byeP ::
-  Parser Bye
-byeP =
-  Bye <$>
-  option auto (long "a big d" <> short 'd' <> help "gimme a d") <*>
-  option auto (long "a big e" <> short 'e' <> help "gimme a e")
+parserIndicatedAirspeedPressureAltitudeTemperature ::
+  Parser (IndicatedAirspeedPressureAltitudeTemperature Double Double Double)
+parserIndicatedAirspeedPressureAltitudeTemperature =
+  parserIndicatedAirspeedPressureAltitudeTemperature' parseDouble parseDouble parseDouble
 
-data HiOrBye =
-  IsHi Hi
-  | IsBye Bye
-  deriving (Eq, Ord, Show)
-
-hiOrByeP ::
-  Parser HiOrBye
-hiOrByeP =
-  (IsHi <$> hiP) <|> (IsBye <$> byeP)
-
-
-
-
-
-
-
-
-
-
-
-
-{-
-let unitOfDistanceReadM ::
-        ReadM UnitOfDistance
-      unitOfDistanceReadM =
-        let r = 
-              [
-                ("metre" , Metre')
-              , ("metres", Metre')
-              , ("meter" , Metre')
-              , ("meters", Metre')
-              , ("m"     , Metre')
-              , ("foot"  , Foot')
-              , ("feet"  , Foot')
-              , ("ft"    , Foot')
-              , ("inch"  , Inch')
-              , ("inches", Inch')
-              , ("in"    , Inch')
-              ]
-        in  maybeReader (\s -> lookup s r)
-      fields ::
-        Mod OptionFields UnitOfDistance
-      fields =
-        long "unit-of-distance" <>
-        short 'u' <>
-        help "The unit of measurement of distance" <>
-        value Metre'
-        -}
-
+----
 
 parseDensityAltitude' ::
   CharParsing f =>
@@ -116,6 +88,25 @@ parseDensityAltitude ::
 parseDensityAltitude =
   parseDensityAltitude' parseDouble
 
+readDensityAltitude' ::
+  SourceName
+  -> Parsec String () a
+  -> ReadM (DensityAltitude a)
+readDensityAltitude' x =
+  parseRead x . parseDensityAltitude'
+  
+readDensityAltitude ::
+  SourceName
+  -> ReadM (DensityAltitude Double)
+readDensityAltitude x =
+  readDensityAltitude' x parseDouble
+
+parserDensityAltitude ::
+  Parsec String () a
+  -> Parser (DensityAltitude a)
+parserDensityAltitude daP =
+  option (readDensityAltitude' "idensity altitude parser" daP) (long "density-altitude" <> short 'a' <> help ("density altitude, a numeric value and unit of measurement of distance. " ++ printMeasures measuresDistanceUnit))
+
 parseIndicatedAirspeed' ::
   CharParsing f =>
   f a
@@ -128,6 +119,25 @@ parseIndicatedAirspeed ::
   f (IndicatedAirspeed Double)
 parseIndicatedAirspeed =
   parseIndicatedAirspeed' parseDouble
+
+readIndicatedAirspeed' ::
+  SourceName
+  -> Parsec String () a
+  -> ReadM (IndicatedAirspeed a)
+readIndicatedAirspeed' x =
+  parseRead x . parseIndicatedAirspeed'
+  
+readIndicatedAirspeed ::
+  SourceName
+  -> ReadM (IndicatedAirspeed Double)
+readIndicatedAirspeed x =
+  readIndicatedAirspeed' x parseDouble
+
+parserIndicatedAirspeed ::
+  Parsec String () a
+  -> Parser (IndicatedAirspeed a)
+parserIndicatedAirspeed iasP =
+  option (readIndicatedAirspeed' "indicated airspeed parser" iasP) (long "indicated-airspeed" <> short 's' <> help ("indicated airspeed, a numeric value and unit of measurement of velocity. " ++ printMeasures measuresVelocityUnit))
 
 parseIndicatedAltitude' ::
   CharParsing f =>
@@ -142,6 +152,25 @@ parseIndicatedAltitude ::
 parseIndicatedAltitude =
   parseIndicatedAltitude' parseDouble
 
+readIndicatedAltitude' ::
+  SourceName
+  -> Parsec String () a
+  -> ReadM (IndicatedAltitude a)
+readIndicatedAltitude' x =
+  parseRead x . parseIndicatedAltitude'
+  
+readIndicatedAltitude ::
+  SourceName
+  -> ReadM (IndicatedAltitude Double)
+readIndicatedAltitude x =
+  readIndicatedAltitude' x parseDouble
+
+parserIndicatedAltitude ::
+  Parsec String () a
+  -> Parser (IndicatedAltitude a)
+parserIndicatedAltitude iaP =
+  option (readIndicatedAltitude' "indicated altitude parser" iaP) (long "indicated-altitude" <> short 'a' <> help ("indicated altitude, a numeric value and unit of measurement of distance. " ++ printMeasures measuresDistanceUnit))
+
 parsePressureAltitude' ::
   CharParsing f =>
   f a
@@ -154,6 +183,25 @@ parsePressureAltitude ::
   f (PressureAltitude Double)
 parsePressureAltitude =
   parsePressureAltitude' parseDouble
+
+readPressureAltitude' ::
+  SourceName
+  -> Parsec String () a
+  -> ReadM (PressureAltitude a)
+readPressureAltitude' x =
+  parseRead x . parsePressureAltitude'
+  
+readPressureAltitude ::
+  SourceName
+  -> ReadM (PressureAltitude Double)
+readPressureAltitude x =
+  readPressureAltitude' x parseDouble
+
+parserPressureAltitude ::
+  Parsec String () a
+  -> Parser (PressureAltitude a)
+parserPressureAltitude paP =
+  option (readPressureAltitude' "pressure altitude parser" paP) (long "pressure-altitude" <> short 'a' <> help ("pressure altitude, a numeric value and unit of measurement of distance. " ++ printMeasures measuresDistanceUnit))
 
 parseQNH' ::
   CharParsing f =>
@@ -168,6 +216,25 @@ parseQNH ::
 parseQNH =
   parseQNH' parseDouble
 
+readQNH' ::
+  SourceName
+  -> Parsec String () a
+  -> ReadM (QNH a)
+readQNH' x =
+  parseRead x . parseQNH'
+  
+readQNH ::
+  SourceName
+  -> ReadM (QNH Double)
+readQNH x =
+  readQNH' x parseDouble
+
+parserQNH ::
+  Parsec String () a
+  -> Parser (QNH a)
+parserQNH qnhP =
+  option (readQNH' "QNH parser" qnhP) (long "qnh" <> short 'q' <> help ("QNH, a numeric value and unit of measurement of pressure. " ++ printMeasures measuresPressureUnit))
+
 parseTemperature' ::
   CharParsing f =>
   f a
@@ -180,6 +247,25 @@ parseTemperature ::
   f (Temperature Double)
 parseTemperature =
   parseTemperature' parseDouble
+
+readTemperature' ::
+  SourceName
+  -> Parsec String () a
+  -> ReadM (Temperature a)
+readTemperature' x =
+  parseRead x . parseTemperature'
+  
+readTemperature ::
+  SourceName
+  -> ReadM (Temperature Double)
+readTemperature x =
+  readTemperature' x parseDouble
+
+parserTemperature ::
+  Parsec String () a
+  -> Parser (Temperature a)
+parserTemperature tmpP =
+  option (readTemperature' "temperature parser" tmpP) (long "temperature" <> short 't' <> help ("temperature, a numeric value and unit of measurement of temperature. " ++ printMeasures measuresTemperatureUnit))
 
 parseTrueAirspeed' ::
   CharParsing f =>
@@ -194,62 +280,97 @@ parseTrueAirspeed ::
 parseTrueAirspeed =
   parseTrueAirspeed' parseDouble
 
+readTrueAirspeed' ::
+  SourceName
+  -> Parsec String () a
+  -> ReadM (TrueAirspeed a)
+readTrueAirspeed' x =
+  parseRead x . parseTrueAirspeed'
+  
+readTrueAirspeed ::
+  SourceName
+  -> ReadM (TrueAirspeed Double)
+readTrueAirspeed x =
+  readTrueAirspeed' x parseDouble
+
+parserTrueAirspeed ::
+  Parsec String () a
+  -> Parser (TrueAirspeed a)
+parserTrueAirspeed tmpP =
+  option (readTrueAirspeed' "true airspeed parser" tmpP) (long "true-airspeed" <> short 's' <> help ("true airspeed, a numeric value and unit of measurement of velocity. " ++ printMeasures measuresVelocityUnit))
+
+measuresDistanceUnit ::
+  [(DistanceUnit, [String])]
+measuresDistanceUnit =
+  [
+    (Kilometre   , ["kilometres", "kilometers", "kilometre", "kilometer", "km"])
+  , (Centimetre  , ["centimetres", "centimeters", "centimetre", "centimeter", "cm"])
+  , (Micrometre  , ["micrometres", "micrometers", "micrometre", "micrometer", "microns", "micron", "μm"])
+  , (StatuteMile , ["miles", "mile", "sm", "mi"])
+  , (Yard        , ["yards", "yard", "yds", "yd"])
+  , (Foot        , ["foot", "feet", "ft", "'", "’"])
+  , (Inch        , ["inches", "inch", "in", "\"", "”"])
+  , (NauticalMile, ["nm"])
+  , (Millimetre  , ["millimetres", "millimeters", "millimetre", "millimeter", "mm"])
+  , (Metre       , ["metres", "meters", "metre", "meter", "m"])
+  ]
+
 parseDistanceUnit ::
   CharParsing f =>
   f DistanceUnit
 parseDistanceUnit =
-  parseUnit
-    [
-      (Kilometre   , ["kilometres", "kilometers", "kilometre", "kilometer", "km"])
-    , (Centimetre  , ["centimetres", "centimeters", "centimetre", "centimeter", "cm"])
-    , (Micrometre  , ["micrometres", "micrometers", "micrometre", "micrometer", "microns", "micron", "μm"])
-    , (StatuteMile , ["miles", "mile", "sm", "mi"])
-    , (Yard        , ["yards", "yard", "yds", "yd"])
-    , (Foot        , ["foot", "feet", "ft", "'", "’"])
-    , (Inch        , ["inches", "inch", "in", "\"", "”"])
-    , (NauticalMile, ["nm"])
-    , (Millimetre  , ["millimetres", "millimeters", "millimetre", "millimeter", "mm"])
-    , (Metre       , ["metres", "meters", "metre", "meter", "m"])
-    ]
+  parseUnit measuresDistanceUnit
+
+measuresPressureUnit ::
+  [(PressureUnit, [String])]
+measuresPressureUnit =
+  [
+    (Pascal     , ["pascals", "pascal", "pa"])
+  , (Hectopascal, ["hectopascals", "hectopascal", "hpa", "millibars", "millibar", "mb", "mbar"])
+  , (InHg       , ["inhg", "\"hg", "”hg"])
+  , (Psi        , ["psi", "lbf/in²", "lbf/in2", "lb/in", "lbf-in²", "lbf-in2", "lb-in"])
+  , (Torr       , ["torrs", "torr"])
+  , (Atmosphere , ["atmospheres", "atmosphere", "atm"])
+  , (Bar        , ["bar"])
+  ]
 
 parsePressureUnit ::
   CharParsing f =>
   f PressureUnit
 parsePressureUnit =
-  parseUnit
-    [
-      (Pascal     , ["pascals", "pascal", "pa"])
-    , (Hectopascal, ["hectopascals", "hectopascal", "hpa", "millibars", "millibar", "mb", "mbar"])
-    , (InHg       , ["inhg", "\"hg", "”hg"])
-    , (Psi        , ["psi", "lbf/in²", "lbf/in2", "lb/in", "lbf-in²", "lbf-in2", "lb-in"])
-    , (Torr       , ["torrs", "torr"])
-    , (Atmosphere , ["atmospheres", "atmosphere", "atm"])
-    , (Bar        , ["bar"])
-    ]
+  parseUnit measuresPressureUnit
+
+measuresTemperatureUnit ::
+  [(TemperatureUnit, [String])]
+measuresTemperatureUnit =
+  [
+    (Celsius   , ["celsius", "cels", "c", "°c"])
+  , (Fahrenheit, ["fahrenheit", "fah", "fahr", "f", "°f"])
+  , (Kelvin    , ["kelvin", "k", "°k"])
+  ]
 
 parseTemperatureUnit ::
   CharParsing f =>
   f TemperatureUnit
 parseTemperatureUnit =
-  parseUnit
-    [
-      (Celsius   , ["celsius", "cels", "c", "°c"])
-    , (Fahrenheit, ["fahrenheit", "fah", "fahr", "f", "°f"])
-    , (Kelvin    , ["kelvin", "k", "°k"])
-    ]
+  parseUnit measuresTemperatureUnit
+
+measuresVelocityUnit ::
+  [(VelocityUnit, [String])]
+measuresVelocityUnit =
+  [
+    (Knot   , ["knots", "knot", "kt", "kts", "kn"])
+  , (KilometreHour, ["kph", "km/hr", "kmh", "kp/h", "km/h", "kmph", "k.p.h.", "km/hour"])
+  , (StatuteMileHour    , ["mph", "mi/h"])
+  , (MetreSecond    , ["m/s", "mps", "m·s⁻¹", "m s⁻¹"])
+  , (FootSecond    , ["ft/s", "ft/sec", "fps", "ft s⁻¹"])
+  ]
 
 parseVelocityUnit ::
   CharParsing f =>
   f VelocityUnit
 parseVelocityUnit =
-  parseUnit
-    [
-      (Knot   , ["knots", "knot", "kt", "kts", "kn"])
-    , (KilometreHour, ["kph", "km/hr", "kmh", "kp/h", "km/h", "kmph", "k.p.h.", "km/hour"])
-    , (StatuteMileHour    , ["mph", "mi/h"])
-    , (MetreSecond    , ["m/s", "mps", "m·s⁻¹", "m s⁻¹"])
-    , (FootSecond    , ["ft/s", "ft/sec", "fps", "ft s⁻¹"])
-    ]
+  parseUnit measuresVelocityUnit
 
 ----
 
@@ -273,6 +394,13 @@ parseDouble =
         bool 1 (-1) . isJust
   in  (\n d -> sign n * either fromIntegral id d) <$> optional (char '-') <* spaces <*> naturalOrDouble
 
+parseRead ::
+  SourceName
+  -> Parsec String () a
+  -> ReadM a
+parseRead x p =
+  eitherReader (\s -> parse p x s & _Left %~ show)
+
 caseInsensitiveString ::
   (CharParsing f, Traversable t) =>
   t Char
@@ -281,6 +409,12 @@ caseInsensitiveString s =
   let caseInsensitiveChar c =
         char (toLower c) <|> char (toUpper c)
   in  try (mapM caseInsensitiveChar s)
+
+printMeasures ::
+  [(a, [String])]
+  -> String
+printMeasures x =
+  "[ " ++ (x >>= \(_, ss) -> ss >>= \s -> s ++ " ") ++ "]"
 
 {-
 calculateDensityAltitudePressureAltitude ::
