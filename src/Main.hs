@@ -14,7 +14,7 @@ import Papa hiding (option)
 main ::
   IO ()
 main =
-  let im = fullDesc <> progDesc "Print a greeting for TARGET" <> header "hello - a test for optparse-applicative"
+  let im = fullDesc <> progDesc "e6b flight computer functions for aviation" <> header "e6b flight computer"
   in  do  q <- execParser (info (hiOrByeP <**> helper) im)
           putStrLn (show q)
 
