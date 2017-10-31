@@ -10,6 +10,7 @@ module Data.Aviation.E6B(
   module E
 ) where
 
+import Data.Aviation.E6B.CLI as E
 import Data.Aviation.E6B.DensityAltitude as E
 import Data.Aviation.E6B.DensityAltitudePressureAltitude as E
 import Data.Aviation.E6B.DistanceUnit as E
