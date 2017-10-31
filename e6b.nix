@@ -1,7 +1,6 @@
-{ mkDerivation, ansi-wl-pprint, base, digit, hedgehog, lens
-, optparse-applicative, papa, parsec, parsec-numbers, parsers
-, pretty, stdenv, tasty, tasty-hedgehog, tasty-hspec, tasty-hunit
-, text
+{ mkDerivation, ansi-terminal, ansi-wl-pprint, base, hedgehog, lens
+, optparse-applicative, papa, parsec, parsers, pretty, stdenv
+, tasty, tasty-hedgehog, tasty-hspec, tasty-hunit, text
 }:
 mkDerivation {
   pname = "e6b";
@@ -9,11 +8,10 @@ mkDerivation {
   src = ./.;
   isLibrary = true;
   isExecutable = true;
-  libraryHaskellDepends = [ base lens papa ];
-  executableHaskellDepends = [
-    base digit lens optparse-applicative papa parsec parsec-numbers
-    parsers
+  libraryHaskellDepends = [
+    base lens optparse-applicative papa parsec parsers
   ];
+  executableHaskellDepends = [ ansi-terminal base lens papa ];
   testHaskellDepends = [
     ansi-wl-pprint base hedgehog papa parsec parsers pretty tasty
     tasty-hedgehog tasty-hspec tasty-hunit text

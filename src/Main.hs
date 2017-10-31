@@ -4,13 +4,178 @@ module Main(
   main
 ) where
 
-import Data.Aviation.E6B.CLI
 import Data.Aviation.E6B -- (parserE6BOptions, parseDouble)
 import Options.Applicative(fullDesc, progDesc, header, execParser, info, helper)
 import Papa
+import System.Console.ANSI
 import Text.Printf
 
-undefined = undefined
+defaultPreferences ::
+  Preferences
+defaultPreferences =
+  Preferences
+    (
+      SGRs
+        []
+        []
+        []
+        []
+        []
+        []
+        []
+        []
+        []
+    )
+    (
+      PrintfFormats
+        Nothing
+        Nothing
+        Nothing
+        Nothing
+        Nothing
+        Nothing
+        Nothing
+        Nothing
+        Nothing
+     )
+    (
+      OutputUnits
+        Nothing
+        Nothing
+        Nothing
+        Nothing
+    )
+    (
+      UnitAbbreviations
+        (
+          TemperatureUnitAbbreviations
+            "°C"
+            "°F"
+            "°K"
+        )
+        (
+          DistanceUnitAbbreviations
+            "km"
+            "m"
+            "cm"
+            "mm"
+            "μm"
+            "sm"
+            "yd"
+            "ft"
+            "in"
+            "nm"
+        )
+        (
+          VelocityUnitAbbreviations
+            "kt"
+            "km/h"
+            "mph"
+            "m/s"
+            "ft/s"
+        )
+        (
+          PressureUnitAbbreviations
+            "Pa"
+            "hPa"
+            "inHg"
+            "psi"
+            "Torr"
+            "ATM"
+            "bar"
+        )
+    )
+
+data Preferences =
+  Preferences
+    SGRs
+    PrintfFormats
+    OutputUnits
+    UnitAbbreviations
+  deriving (Eq, Ord, Show)
+
+data SGRs =
+  SGRs
+    [SGR] -- input field name
+    [SGR] -- input field value
+    [SGR] -- input field unit
+    [SGR] -- output field name
+    [SGR] -- output field value
+    [SGR] -- output field unit
+    [SGR] -- output top line
+    [SGR] -- output centre line
+    [SGR] -- output bottom line
+  deriving (Eq, Ord, Show)
+
+data PrintfFormats =
+  PrintfFormats
+    (Maybe String) -- input field name
+    (Maybe String) -- input field value
+    (Maybe String) -- input field unit
+    (Maybe String) -- output field name
+    (Maybe String) -- output field value
+    (Maybe String) -- output field unit
+    (Maybe String) -- output top line
+    (Maybe String) -- output centre line
+    (Maybe String) -- output bottom line
+  deriving (Eq, Ord, Show)
+
+data OutputUnits =
+  OutputUnits
+    (Maybe TemperatureUnit)
+    (Maybe DistanceUnit)
+    (Maybe VelocityUnit)
+    (Maybe PressureUnit)
+  deriving (Eq, Ord, Show)
+
+data UnitAbbreviations =
+  UnitAbbreviations
+    TemperatureUnitAbbreviations
+    DistanceUnitAbbreviations
+    VelocityUnitAbbreviations
+    PressureUnitAbbreviations
+  deriving (Eq, Ord, Show)
+
+data TemperatureUnitAbbreviations =
+  TemperatureUnitAbbreviations
+    String-- celsius
+    String -- fahrenheit
+    String -- kelvin
+  deriving (Eq, Ord, Show)
+
+data DistanceUnitAbbreviations =
+  DistanceUnitAbbreviations
+    String -- kilometre
+    String -- metre
+    String -- centimetre
+    String -- millimetre
+    String -- micrometre
+    String -- statute mile
+    String -- yard
+    String -- foot
+    String -- inch
+    String -- nautical mile
+  deriving (Eq, Ord, Show)
+
+data VelocityUnitAbbreviations =
+  VelocityUnitAbbreviations
+    String -- knot
+    String -- kilometres/hour
+    String -- statute miles/hour
+    String -- metres/second
+    String -- foot/second
+  deriving (Eq, Ord, Show)
+
+data PressureUnitAbbreviations =
+  PressureUnitAbbreviations
+    String -- pascal
+    String -- hectopascal
+    String -- in/hg
+    String -- psi
+    String -- torr
+    String -- atmosphere
+    String -- bar
+  deriving (Eq, Ord, Show)
 
 printResult ::
   E6BOptions Double Double Double Double Double
@@ -83,7 +248,7 @@ printResult (IsIndicatedAirspeedPressureAltitudeTemperature x) =
         , "================================"
         , "\n"
         ]
-        
+
 main ::
   IO ()
 main =
@@ -162,16 +327,3 @@ printTemperatureUnit Fahrenheit =
   "°F"
 printTemperatureUnit Kelvin =
   "°K"
-
-{-
-
-data DensityAltitudePressureAltitude da pa
-  = DensityAltitudePressureAltitude (DensityAltitude da)
-                                    (PressureAltitude pa)
-
-
-  :: (HasTemperature s a, HasQNH s a, HasIndicatedAltitude s a,
-      Floating a) =>
-     s -> DensityAltitudePressureAltitude a a
-
--}
