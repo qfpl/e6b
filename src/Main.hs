@@ -36,7 +36,6 @@ defaultPreferences =
         Nothing
         Nothing
         Nothing
-        Nothing
      )
     (
       OutputUnits
@@ -109,15 +108,14 @@ data SGRs =
 
 data PrintfFormats =
   PrintfFormats
-    (Maybe String) -- input field name
-    (Maybe String) -- input field value
-    (Maybe String) -- input field unit
-    (Maybe String) -- output field name
-    (Maybe String) -- output field value
-    (Maybe String) -- output field unit
-    (Maybe String) -- output top line
-    (Maybe String) -- output centre line
-    (Maybe String) -- output bottom line
+    (Maybe String) -- indicated altitude
+    (Maybe String) -- density altitude
+    (Maybe String) -- pressure altitude
+    (Maybe String) -- qnh
+    (Maybe String) -- temperature
+    (Maybe String) -- indicated airspeed
+    (Maybe String) -- true airspeed
+    (Maybe String) -- density altitude
   deriving (Eq, Ord, Show)
 
 data OutputUnits =
