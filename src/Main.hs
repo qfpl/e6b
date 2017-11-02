@@ -5,11 +5,38 @@ module Main(
   main
 ) where
 
+import Control.Applicative(liftA2)
+import Control.Monad.Trans
 import Data.Aviation.E6B -- (parserE6BOptions, parseDouble)
 import Options.Applicative(fullDesc, progDesc, header, execParser, info, helper)
 import Papa
 import System.Console.ANSI
 import Text.Printf
+
+newtype PreferencesReaderT f a =
+  PreferencesReaderT (Preferences -> f a)
+
+instance Functor f => Functor (PreferencesReaderT f) where
+  fmap f (PreferencesReaderT k) =
+    PreferencesReaderT (fmap f . k)
+
+instance Applicative f => Applicative (PreferencesReaderT f) where
+  pure =
+    PreferencesReaderT . pure . pure
+  PreferencesReaderT f <*> PreferencesReaderT a =
+    PreferencesReaderT (liftA2 (<*>) f a)
+
+instance Monad f => Monad (PreferencesReaderT f) where
+  return = 
+    PreferencesReaderT . return . return
+  PreferencesReaderT k >>= f =
+    PreferencesReaderT (\p -> k p >>= \a -> let PreferencesReaderT i = f a in i p)
+
+instance MonadTrans PreferencesReaderT where
+  lift =
+    PreferencesReaderT . pure
+
+undefined = undefined
 
 defaultPreferences ::
   Preferences

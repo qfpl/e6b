@@ -1,5 +1,5 @@
 { mkDerivation, ansi-terminal, ansi-wl-pprint, base, hedgehog, lens
-, optparse-applicative, papa, parsec, parsers, pretty, stdenv
+, mtl, optparse-applicative, papa, parsec, parsers, pretty, stdenv
 , tasty, tasty-hedgehog, tasty-hspec, tasty-hunit, text
 }:
 mkDerivation {
@@ -9,9 +9,12 @@ mkDerivation {
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [
-    base lens optparse-applicative papa parsec parsers
+    base lens mtl optparse-applicative papa parsec parsers
   ];
-  executableHaskellDepends = [ ansi-terminal base lens papa ];
+  executableHaskellDepends = [
+    ansi-terminal base lens mtl optparse-applicative papa parsec
+    parsers
+  ];
   testHaskellDepends = [
     ansi-wl-pprint base hedgehog papa parsec parsers pretty tasty
     tasty-hedgehog tasty-hspec tasty-hunit text
