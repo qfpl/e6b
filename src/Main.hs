@@ -254,7 +254,6 @@ printTrueAirspeedDensityAltitudeResult x =
         , "\n"
         ]
 
-
 printResult ::
   E6BOptions Double Double Double Double Double
   -> String
@@ -262,7 +261,7 @@ printResult (IsIndicatedAltitudeQNHTemperature x) =
   printDensityAltitudePressureAltitudeResult x
 printResult (IsIndicatedAirspeedPressureAltitudeTemperature x) =
   printTrueAirspeedDensityAltitudeResult x
-  
+
 main ::
   IO ()
 main =
