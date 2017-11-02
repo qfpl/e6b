@@ -1,4 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module Main(
   main
@@ -175,10 +176,11 @@ data PressureUnitAbbreviations =
     String -- bar
   deriving (Eq, Ord, Show)
 
-printResult ::
-  E6BOptions Double Double Double Double Double
+printDensityAltitudePressureAltitudeResult ::
+  (HasTemperature s Double, HasIndicatedAltitude s Double, HasQNH s Double) =>
+  s
   -> String
-printResult (IsIndicatedAltitudeQNHTemperature x) =
+printDensityAltitudePressureAltitudeResult x =
   let g ::
         DensityAltitudePressureAltitude Double Double
       g =
@@ -212,7 +214,12 @@ printResult (IsIndicatedAltitudeQNHTemperature x) =
         , "================================"
         , "\n"
         ]
-printResult (IsIndicatedAirspeedPressureAltitudeTemperature x) =
+
+printTrueAirspeedDensityAltitudeResult ::
+  (HasIndicatedAirspeed s Double, HasTemperature s Double, HasPressureAltitude s Double) =>
+  s
+  -> String
+printTrueAirspeedDensityAltitudeResult x =
   let g ::
         TrueAirspeedDensityAltitude Double Double
       g =
@@ -247,6 +254,15 @@ printResult (IsIndicatedAirspeedPressureAltitudeTemperature x) =
         , "\n"
         ]
 
+
+printResult ::
+  E6BOptions Double Double Double Double Double
+  -> String
+printResult (IsIndicatedAltitudeQNHTemperature x) =
+  printDensityAltitudePressureAltitudeResult x
+printResult (IsIndicatedAirspeedPressureAltitudeTemperature x) =
+  printTrueAirspeedDensityAltitudeResult x
+  
 main ::
   IO ()
 main =
