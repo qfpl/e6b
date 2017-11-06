@@ -66,7 +66,6 @@ defaultPreferences =
         Nothing
         Nothing
         Nothing
-        Nothing
      )
     (
       OutputUnits
@@ -162,12 +161,10 @@ data PrintfFormats =
       Maybe String -- qnh
   , _temperature_format ::
       Maybe String -- temperature
-  , _indicated_airspeed ::
+  , _indicated_airspeed_format ::
       Maybe String -- indicated airspeed
-  , _true_airspeed ::
+  , _true_airspeed_format ::
       Maybe String -- true airspeed
-  , _density_altitude ::
-      Maybe String -- density altitude
   } deriving (Eq, Ord, Show)
 
 data OutputUnits =

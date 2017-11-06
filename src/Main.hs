@@ -96,6 +96,90 @@ printDensityAltitudePressureAltitudeResult2 prefs x =
       , Left []
       ]
 
+printTrueAirspeedDensityAltitudeResult2 ::
+  (HasIndicatedAirspeed s Double, HasTemperature s Double, HasPressureAltitude s Double) =>
+  Preferences
+  -> s
+  -> [Either [SGR] String]
+printTrueAirspeedDensityAltitudeResult2 prefs x =
+  let g ::
+        TrueAirspeedDensityAltitude Double Double
+      g =
+        calculateTrueAirspeedDensityAltitude x
+      pr Nothing =
+        show
+      pr (Just f) =
+        printf f
+      ias =
+        set convertIndicatedAirspeed (prefs ^. velocity_unit_output) (x ^. indicatedAirspeed)
+      pa =
+        set convertPressureAltitude (prefs ^. distance_unit_output) (x ^. pressureAltitude)
+      tp =
+        set convertTemperature (prefs ^. temperature_unit_output) (x ^. temperature)
+      tas =
+        set convertTrueAirspeed (prefs ^. velocity_unit_output) (g ^. trueAirspeed)
+      da =
+        set convertDensityAltitude (prefs ^. distance_unit_output) (g ^. densityAltitude)
+  in  [
+        Left $ prefs ^. output_top_line
+      , Right "================================\n"
+      , Left $ prefs ^. input_field_name
+      , Right "ias:"
+      , Left []
+      , Right "   "
+      , Left $ prefs ^. input_field_value
+      , Right $ pr (prefs ^. indicated_airspeed_format) (ias ^. indicatedAirspeedValue)
+      , Left $ prefs ^. input_field_unit
+      , Right $ prefs ^. velocity_unit (ias ^. velocityUnit)
+      , Left []
+      , Right "\n"
+      , Left $ prefs ^. input_field_name
+      , Right "p.alt:"
+      , Left []
+      , Right " "
+      , Left $ prefs ^. input_field_value
+      , Right $ pr (prefs ^. pressure_altitude_format) (pa ^. pressureAltitudeValue)
+      , Left $ prefs ^. input_field_unit
+      , Right $ prefs ^. distance_unit (pa ^. distanceUnit)
+      , Left []
+      , Right "\n"
+      , Left $ prefs ^. input_field_name
+      , Right "temp:"
+      , Left []
+      , Right "  "
+      , Left $ prefs ^. input_field_value
+      , Right $ pr (prefs ^. temperature_format) (tp ^. temperatureValue)
+      , Left $ prefs ^. input_field_unit
+      , Right $ prefs ^. temperature_unit (tp ^. temperatureUnit)
+      , Left []
+      , Right "\n"
+      , Left $ prefs ^. output_centre_line
+      , Right "--------------------------------\n"
+      , Left $ prefs ^. output_field_name
+      , Right "tas:"
+      , Left []
+      , Right " "
+      , Left $ prefs ^. output_field_value
+      , Right $ pr (prefs ^. true_airspeed_format) (tas ^. trueAirspeedValue)
+      , Left $ prefs ^. output_field_unit
+      , Right $ prefs ^. velocity_unit (tas ^. velocityUnit)
+      , Left []
+      , Right "\n"
+      , Left $ prefs ^. output_field_name
+      , Right "d.alt:"
+      , Left []
+      , Right " "
+      , Left $ prefs ^. output_field_value
+      , Right $ pr (prefs ^. density_altitude_format) (da ^. densityAltitudeValue)
+      , Left $ prefs ^. output_field_unit
+      , Right $ prefs ^. distance_unit (da ^. distanceUnit)
+      , Left []
+      , Right "\n"
+      , Left $ prefs ^. output_top_line
+      , Right "================================\n"
+      , Left []
+      ]
+
 printDensityAltitudePressureAltitudeResult ::
   (HasTemperature s Double, HasIndicatedAltitude s Double, HasQNH s Double) =>
   s
