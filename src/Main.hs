@@ -5,203 +5,96 @@ module Main(
   main
 ) where
 
-import Control.Applicative(liftA2)
-import Control.Monad.Trans
-import Data.Aviation.E6B -- (parserE6BOptions, parseDouble)
+import Data.Aviation.E6B
 import Options.Applicative(fullDesc, progDesc, header, execParser, info, helper)
 import Papa
 import System.Console.ANSI
 import Text.Printf
 
-newtype PreferencesReaderT f a =
-  PreferencesReaderT (Preferences -> f a)
-
-instance Functor f => Functor (PreferencesReaderT f) where
-  fmap f (PreferencesReaderT k) =
-    PreferencesReaderT (fmap f . k)
-
-instance Applicative f => Applicative (PreferencesReaderT f) where
-  pure =
-    PreferencesReaderT . pure . pure
-  PreferencesReaderT f <*> PreferencesReaderT a =
-    PreferencesReaderT (liftA2 (<*>) f a)
-
-instance Monad f => Monad (PreferencesReaderT f) where
-  return = 
-    PreferencesReaderT . return . return
-  PreferencesReaderT k >>= f =
-    PreferencesReaderT (\p -> k p >>= \a -> let PreferencesReaderT i = f a in i p)
-
-instance MonadTrans PreferencesReaderT where
-  lift =
-    PreferencesReaderT . pure
-
-undefined = undefined
-
-defaultPreferences ::
+printDensityAltitudePressureAltitudeResult2 ::
+  (HasTemperature s Double, HasIndicatedAltitude s Double, HasQNH s Double) =>
   Preferences
-defaultPreferences =
-  Preferences
-    (
-      SGRs
-        []
-        []
-        []
-        []
-        []
-        []
-        []
-        []
-        []
-    )
-    (
-      PrintfFormats
-        Nothing
-        Nothing
-        Nothing
-        Nothing
-        Nothing
-        Nothing
-        Nothing
-        Nothing
-     )
-    (
-      OutputUnits
-        Nothing
-        Nothing
-        Nothing
-        Nothing
-    )
-    (
-      UnitAbbreviations
-        (
-          TemperatureUnitAbbreviations
-            "°C"
-            "°F"
-            "°K"
-        )
-        (
-          DistanceUnitAbbreviations
-            "km"
-            "m"
-            "cm"
-            "mm"
-            "μm"
-            "sm"
-            "yd"
-            "ft"
-            "in"
-            "nm"
-        )
-        (
-          VelocityUnitAbbreviations
-            "kt"
-            "km/h"
-            "mph"
-            "m/s"
-            "ft/s"
-        )
-        (
-          PressureUnitAbbreviations
-            "Pa"
-            "hPa"
-            "inHg"
-            "psi"
-            "Torr"
-            "ATM"
-            "bar"
-        )
-    )
-
-data Preferences =
-  Preferences
-    SGRs
-    PrintfFormats
-    OutputUnits
-    UnitAbbreviations
-  deriving (Eq, Ord, Show)
-
-data SGRs =
-  SGRs
-    [SGR] -- input field name
-    [SGR] -- input field value
-    [SGR] -- input field unit
-    [SGR] -- output field name
-    [SGR] -- output field value
-    [SGR] -- output field unit
-    [SGR] -- output top line
-    [SGR] -- output centre line
-    [SGR] -- output bottom line
-  deriving (Eq, Ord, Show)
-
-data PrintfFormats =
-  PrintfFormats
-    (Maybe String) -- indicated altitude
-    (Maybe String) -- density altitude
-    (Maybe String) -- pressure altitude
-    (Maybe String) -- qnh
-    (Maybe String) -- temperature
-    (Maybe String) -- indicated airspeed
-    (Maybe String) -- true airspeed
-    (Maybe String) -- density altitude
-  deriving (Eq, Ord, Show)
-
-data OutputUnits =
-  OutputUnits
-    (Maybe TemperatureUnit)
-    (Maybe DistanceUnit)
-    (Maybe VelocityUnit)
-    (Maybe PressureUnit)
-  deriving (Eq, Ord, Show)
-
-data UnitAbbreviations =
-  UnitAbbreviations
-    TemperatureUnitAbbreviations
-    DistanceUnitAbbreviations
-    VelocityUnitAbbreviations
-    PressureUnitAbbreviations
-  deriving (Eq, Ord, Show)
-
-data TemperatureUnitAbbreviations =
-  TemperatureUnitAbbreviations
-    String-- celsius
-    String -- fahrenheit
-    String -- kelvin
-  deriving (Eq, Ord, Show)
-
-data DistanceUnitAbbreviations =
-  DistanceUnitAbbreviations
-    String -- kilometre
-    String -- metre
-    String -- centimetre
-    String -- millimetre
-    String -- micrometre
-    String -- statute mile
-    String -- yard
-    String -- foot
-    String -- inch
-    String -- nautical mile
-  deriving (Eq, Ord, Show)
-
-data VelocityUnitAbbreviations =
-  VelocityUnitAbbreviations
-    String -- knot
-    String -- kilometres/hour
-    String -- statute miles/hour
-    String -- metres/second
-    String -- foot/second
-  deriving (Eq, Ord, Show)
-
-data PressureUnitAbbreviations =
-  PressureUnitAbbreviations
-    String -- pascal
-    String -- hectopascal
-    String -- in/hg
-    String -- psi
-    String -- torr
-    String -- atmosphere
-    String -- bar
-  deriving (Eq, Ord, Show)
+  -> s
+  -> [Either [SGR] String]
+printDensityAltitudePressureAltitudeResult2 prefs x =
+  let g ::
+        DensityAltitudePressureAltitude Double Double
+      g =
+        calculateDensityAltitudePressureAltitude x
+      pr Nothing =
+        show
+      pr (Just f) =
+        printf f
+      ia =
+        set convertIndicatedAltitude (prefs ^. distance_unit_output) (x ^. indicatedAltitude)
+      qnh =
+        set convertQNH (prefs ^. pressure_unit_output) (x ^. qNH)
+      tp =
+        set convertTemperature (prefs ^. temperature_unit_output) (x ^. temperature)
+      da =
+        set convertDensityAltitude (prefs ^. distance_unit_output) (g ^. densityAltitude)
+      pa =
+        set convertPressureAltitude (prefs ^. distance_unit_output) (g ^. pressureAltitude)
+  in  
+      [
+        Left $ prefs ^. output_top_line
+      , Right "================================\n"
+      , Left $ prefs ^. input_field_name
+      , Right "alt:"
+      , Left []
+      , Right "   "
+      , Left $ prefs ^. input_field_value
+      , Right $ pr (prefs ^. indicated_altitude_format) (ia ^. indicatedAltitudeValue)
+      , Left $ prefs ^. input_field_unit
+      , Right $ prefs ^. distance_unit (ia ^. distanceUnit)
+      , Left []
+      , Right "\n"
+      , Left $ prefs ^. input_field_name
+      , Right "qnh:"
+      , Left []
+      , Right "   "
+      , Left $ prefs ^. input_field_value
+      , Right $ pr (prefs ^. qnh_format) (qnh ^. qnhValue)
+      , Left $ prefs ^. input_field_unit
+      , Right $ prefs ^. pressure_unit (qnh ^. pressureUnit)
+      , Left []
+      , Right "\n"
+      , Left $ prefs ^. input_field_name
+      , Right "temp:"
+      , Left []
+      , Right "  "
+      , Left $ prefs ^. input_field_value
+      , Right $ pr (prefs ^. temperature_format) (tp ^. temperatureValue)
+      , Left $ prefs ^. input_field_unit
+      , Right $ prefs ^. temperature_unit (tp ^. temperatureUnit)
+      , Left []
+      , Right "\n"
+      , Left $ prefs ^. output_centre_line
+      , Right "--------------------------------\n"
+      , Left $ prefs ^. output_field_name
+      , Right "d.alt:"
+      , Left []
+      , Right " "
+      , Left $ prefs ^. output_field_value
+      , Right $ pr (prefs ^. density_altitude_format) (da ^. densityAltitudeValue)
+      , Left $ prefs ^. output_field_unit
+      , Right $ prefs ^. distance_unit (da ^. distanceUnit)
+      , Left []
+      , Right "\n"
+      , Left $ prefs ^. output_field_name
+      , Right "p.alt:"
+      , Left []
+      , Right " "
+      , Left $ prefs ^. output_field_value
+      , Right $ pr (prefs ^. pressure_altitude_format) (pa ^. pressureAltitudeValue)
+      , Left $ prefs ^. output_field_unit
+      , Right $ prefs ^. distance_unit (pa ^. distanceUnit)
+      , Left []
+      , Right "\n"
+      , Left $ prefs ^. output_top_line
+      , Right "================================\n"
+      , Left []
+      ]
 
 printDensityAltitudePressureAltitudeResult ::
   (HasTemperature s Double, HasIndicatedAltitude s Double, HasQNH s Double) =>

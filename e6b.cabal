@@ -29,6 +29,7 @@ library
                     , Data.Aviation.E6B.IndicatedAirspeedPressureAltitudeTemperature
                     , Data.Aviation.E6B.IndicatedAltitude
                     , Data.Aviation.E6B.IndicatedAltitudeQNHTemperature
+                    , Data.Aviation.E6B.Preferences 
                     , Data.Aviation.E6B.PressureAltitude 
                     , Data.Aviation.E6B.PressureUnit
                     , Data.Aviation.E6B.QNH

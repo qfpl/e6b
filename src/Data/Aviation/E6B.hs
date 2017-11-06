@@ -18,6 +18,7 @@ import Data.Aviation.E6B.IndicatedAirspeed as E
 import Data.Aviation.E6B.IndicatedAirspeedPressureAltitudeTemperature as E
 import Data.Aviation.E6B.IndicatedAltitude as E
 import Data.Aviation.E6B.IndicatedAltitudeQNHTemperature as E
+import Data.Aviation.E6B.Preferences as E
 import Data.Aviation.E6B.PressureAltitude as E
 import Data.Aviation.E6B.PressureUnit as E
 import Data.Aviation.E6B.QNH as E
