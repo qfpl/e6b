@@ -18,7 +18,7 @@
             "keepnr": 5,
             "inputs": {
                 "e6b": { "type": "git", "value": "https://github.com/qfpl/e6b", "emailresponsible": false },
-                "nixpkgs": { "type": "git", "value": "https://github.com/NixOS/nixpkgs.git release-17.03", "emailresponsible": false }
+                "nixpkgs": { "type": "git", "value": "https://github.com/NixOS/nixpkgs.git release-17.09", "emailresponsible": false }
             }
         }
     }
