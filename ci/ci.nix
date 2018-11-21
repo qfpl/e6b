@@ -1,5 +1,5 @@
 { supportedSystems ? ["x86_64-linux"]
-, supportedCompilers ? [ "ghc7103" "ghc802" "ghc821" ] 
+, supportedCompilers ? [ "ghc802" "ghc822" "ghc844" "ghc861" ] 
 }:
 
 with (import <nixpkgs/pkgs/top-level/release-lib.nix> { inherit supportedSystems; });
@@ -11,7 +11,7 @@ let
     pkgs.lib.listToAttrs (
       pkgs.lib.concatMap (compiler: 
         pkgs.lib.concatMap (system: 
-          [{name = "haskell.packages." + compiler + ".e6b." + system ; value = {inherit compiler system;};}]
+          [{name = "haskell.packages." + compiler + ".digit." + system ; value = {inherit compiler system;};}]
         ) supportedSystems
       ) supportedCompilers
     );
@@ -22,9 +22,9 @@ let
             compiler = configuration.compiler; 
             system = configuration.system; 
             nixpkgs = { pkgs = pkgsFor system; };
-            e6b = import ../default.nix { inherit nixpkgs compiler; };
+            digit = import ../default.nix { inherit nixpkgs compiler; };
           in
-            e6b
+            digit
       ) configurations;
 in
   jobs
