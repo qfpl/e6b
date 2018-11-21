@@ -12,15 +12,15 @@ let
     exitcode = pkgs.fetchFromGitHub {
       owner = "qfpl";
       repo = "exitcode";
-      rev = "758639382d38a6afff6c5d2e4f37b600932f5f3a";
-      sha256 = "01qbh7kcf6h0ilrfivknfm226x48xmn1gx348aqkgrc2x1l4z8g6";
+      rev = "bdcd9f3ed7db539163eb7b3d9bd0c27e543163d7";
+      sha256 = "1pai4x3q82z2nkc7cqv8q15n2n71mam4g357ix1g0ma9zpq8mfjw";
     };
    
     papa = pkgs.fetchFromGitHub {
       owner = "qfpl";
       repo = "papa";
-      rev = "97ef00aa45c70213a4f0ce348a2208e3f482a7e3";
-      sha256 = "0qm0ay49wc0frxs6ipc10xyjj654b0wgk0b1hzm79qdlfp2yq0n5";
+      rev = "536b0a9243802347c299e077b5d85beb80d3a4a1";
+      sha256 = "10wx0z5cd8dajr3rdskaq64v42ppa8dbb3rs3jyj872218xjz6nr";
     };
   };
 
@@ -29,6 +29,7 @@ let
       exitcode = import sources.exitcode { inherit nixpkgs compiler; };
       hedgehog       = self.callHackage "hedgehog" "0.6" {};
       tasty-hedgehog = self.callHackage "tasty-hedgehog" "0.2.0.0" {};
+      polyparse = self.callHackage "polyparse" "1.12.1" {};
     };
   };
 
