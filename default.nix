@@ -30,6 +30,7 @@ let
       exitcode = import sources.exitcode { inherit nixpkgs compiler; };
       hedgehog       = self.callHackage "hedgehog" "0.6" {};
       tasty-hedgehog = self.callHackage "tasty-hedgehog" "0.2.0.0" {};
+    };
   };
 
   e6b = modifiedHaskellPackages.callPackage ./e6b.nix {};
