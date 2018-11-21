@@ -23,20 +23,13 @@ let
       sha256 = "0qm0ay49wc0frxs6ipc10xyjj654b0wgk0b1hzm79qdlfp2yq0n5";
     };
 
-    tasty-hedgehog = pkgs.fetchFromGitHub {
-      owner = "qfpl";
-      repo = "tasty-hedgehog";
-      rev = "0.1.0.1";
-      sha256 = "04pmr9q70gakd327sywpxr7qp8jnl3b0y2sqxxxcj6zj2q45q38m";
-    };
-
   };
 
   modifiedHaskellPackages = haskellPackages.override {
     overrides = self: super: import sources.papa self // {
       exitcode = import sources.exitcode { inherit nixpkgs compiler; };
-      tasty-hedgehog = import sources.tasty-hedgehog {};
-    };
+      hedgehog       = self.callHackage "hedgehog" "0.6" {};
+      tasty-hedgehog = self.callHackage "tasty-hedgehog" "0.2.0.0" {};
   };
 
   e6b = modifiedHaskellPackages.callPackage ./e6b.nix {};
