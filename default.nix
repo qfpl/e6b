@@ -12,15 +12,15 @@ let
     exitcode = pkgs.fetchFromGitHub {
       owner = "qfpl";
       repo = "exitcode";
-      rev = "bdcd9f3ed7db539163eb7b3d9bd0c27e543163d7";
-      sha256 = "1pai4x3q82z2nkc7cqv8q15n2n71mam4g357ix1g0ma9zpq8mfjw";
+      rev = "28f57c842c8864542fde0efae8788ce7c2523fea";
+      sha256 = "1v7aski1vvxxskg20xlgvgfvxv2yjyvdl3aszvvw0g6ak2jwgwsf";
     };
    
     papa = pkgs.fetchFromGitHub {
       owner = "qfpl";
       repo = "papa";
-      rev = "536b0a9243802347c299e077b5d85beb80d3a4a1";
-      sha256 = "10wx0z5cd8dajr3rdskaq64v42ppa8dbb3rs3jyj872218xjz6nr";
+      rev = "5e9ebc1ffa2e40894ed884b637285022278f98e9";
+      sha256 = "085bkmbqa34aks2hgfhxkl2vq8x1qrk5n4nzmvp35nqgcc53cksg";
     };
   };
 
