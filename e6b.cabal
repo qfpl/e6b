@@ -1,8 +1,7 @@
 name:                e6b
 version:             0.1.0.0
 synopsis:            E6B Flight Computer functions
-description:         E6B Flight Computer functions
-homepage:            https://github.com/qfpl/e6b
+description:         E6B Flight Computer functions.
 license:             BSD3
 license-file:        LICENCE
 author:              QFPL
@@ -52,7 +51,7 @@ executable e6b
                     Haskell2010
 
   hs-source-dirs:
-                    src
+                    src-exe
 
   main-is:
                     Main.hs
@@ -60,14 +59,12 @@ executable e6b
   build-depends:
                       base >=4.8 && <4.13                   
                     , lens >=4.15 && <4.18
-                     , papa >= 0.3 && < 0.4
-                     , exitcode >= 0.1.0.0 && < 1.0
+                    , papa >= 0.3 && < 0.4
+                    , exitcode >= 0.1.0.0 && < 1.0
+                    , e6b
 
   ghc-options:
                     -Wall
-
-  other-modules:
-                    Data.Aviation.E6B
 
 test-suite          tests
   type:
